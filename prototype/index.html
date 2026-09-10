@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genie QA Dashboard — Feature Prototype</title>
+<style>
+:root{
+  --bg:#EEF1F4;--surface:#FFFFFF;--ink:#16243A;--ink2:#4B5A6E;--ink3:#8593A5;--line:#D9DFE7;
+  --pass:#1B7F5A;--fail:#C0392B;--skip:#2F6FCB;--warn:#C97A11;--accent:#1B5FA8;
+  --pass-bg:#E3F3EB;--fail-bg:#FBE9E7;--warn-bg:#FDF1E2;--skip-bg:#E6EEF9;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.45;display:grid;grid-template-columns:216px 1fr;min-height:100vh}
+a{color:var(--accent)}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.rail{background:var(--ink);color:#C9D3E0;padding:22px 14px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.brand{color:#fff;font-size:17px;font-weight:600;line-height:1.2;padding:0 8px 18px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:12px}
+.brand small{display:block;color:#8EA0B8;font-weight:400;font-size:12px;margin-top:4px}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav button{all:unset;cursor:pointer;padding:9px 10px;border-radius:4px;color:#C9D3E0;display:flex;justify-content:space-between;align-items:center}
+.rail nav button:hover{background:rgba(255,255,255,.07)}
+.rail nav button.active{background:#fff;color:var(--ink);font-weight:600}
+.rail nav button .n{font-size:11px;color:#8EA0B8;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:3px}
+.rail nav button.active .n{background:var(--fail-bg);color:var(--fail)}
+.rail-foot{margin-top:auto;font-size:12px;color:#8EA0B8;padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.12);line-height:1.6}
+
+main{padding:0 28px 48px;min-width:0}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:22px;position:sticky;top:0;background:var(--bg);z-index:5}
+.filters label{font-size:12px;color:var(--ink2);display:flex;flex-direction:column;gap:3px}
+.filters select,.filters input{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink);min-width:150px}
+.filters .apply{margin-left:auto;background:var(--ink);color:#fff;border:0;border-radius:4px;padding:7px 14px;cursor:pointer;align-self:flex-end}
+.page{display:none}
+.page.active{display:block}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+.lead{color:var(--ink2);margin:0 0 20px;max-width:75ch}
+.lead code{font-size:12px;background:#E4E9EF;padding:1px 5px;border-radius:3px}
+h2{font-size:15px;font-weight:600;margin:0}
+.grid{display:grid;gap:16px;margin-bottom:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:2fr 1fr}
+.g31{grid-template-columns:1fr 1fr 1fr}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;min-width:0}
+.panel-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:12px}
+.panel-h .hint{font-size:12px;color:var(--ink3)}
+.panel.flush{padding:0}
+.panel.flush .panel-h{padding:14px 18px 0}
+
+.hero{grid-column:1/-1;padding:18px 20px 14px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.hero-top h2{font-size:17px}
+.hero-top p{margin:2px 0 0;color:var(--ink2);font-size:13px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.strip-wrap{position:relative}
+.strip{display:flex;align-items:flex-end;gap:2px;height:150px;border-bottom:1px solid var(--line)}
+.strip .bar{flex:1;min-width:2px;border-radius:2px 2px 0 0;cursor:default}
+.strip .bar:hover{outline:2px solid var(--ink)}
+.expired{position:absolute;top:0;bottom:0;left:0;background:repeating-linear-gradient(135deg,rgba(22,36,58,.05) 0 6px,transparent 6px 12px);border-right:2px dashed var(--ink3);pointer-events:none}
+.expired span{position:absolute;right:8px;top:6px;font-size:12px;color:var(--ink2);background:rgba(255,255,255,.85);padding:2px 6px;border-radius:3px;white-space:nowrap}
+.retained{position:absolute;top:0;bottom:0;right:0;pointer-events:none}
+.retained span{position:absolute;left:8px;top:6px;font-size:12px;color:var(--ink2);white-space:nowrap}
+.months{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);margin-top:6px}
+
+.kpis{display:grid;grid-template-columns:repeat(6,1fr)}
+.kpi{padding:14px 16px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi .v{font-size:26px;font-weight:600;line-height:1.1;letter-spacing:-.01em}
+.kpi .l{font-size:12px;color:var(--ink2);margin-top:4px}
+.kpi .d{font-size:12px;margin-top:6px}
+.up{color:var(--pass)}.down{color:var(--fail)}.flat{color:var(--ink3)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink2);font-size:12px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #EDF0F3;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.id{color:var(--ink2);font-size:12px}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;line-height:1.4;white-space:nowrap}
+.b-pass{background:var(--pass-bg);color:var(--pass)}
+.b-fail{background:var(--fail-bg);color:var(--fail)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-skip{background:var(--skip-bg);color:var(--skip)}
+.b-mute{background:#EDF0F3;color:var(--ink2)}
+.tag{display:inline-block;font-size:11px;color:var(--ink2);background:#EDF0F3;padding:1px 6px;border-radius:3px;margin:1px 2px 1px 0}
+.bar-h{display:flex;height:8px;border-radius:2px;overflow:hidden;background:#EDF0F3;min-width:120px}
+.bar-h i{display:block;height:100%}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}
+.dots i{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--pass)}
+.dots i.f{background:var(--fail)}.dots i.s{background:var(--skip)}.dots i.n{background:#DDE2E8}
+.link{white-space:nowrap}
+.actions button{all:unset;cursor:pointer;color:var(--accent);font-size:12px;margin-right:8px}
+
+.chart{width:100%;height:auto;display:block}
+.chart text{font-size:11px;fill:var(--ink3)}
+.chart .grid-l{stroke:#EDF0F3}
+.chart .axis{stroke:var(--line)}
+
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:14px}
+.compare select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:4px;width:100%}
+.compare .vs{color:var(--ink3);font-size:12px}
+.diff{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.diff div{border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+.diff .v{font-size:22px;font-weight:600}
+.diff .l{font-size:12px;color:var(--ink2)}
+.diff.fail .v{color:var(--fail)}
+
+.gate{display:flex;align-items:center;gap:16px;padding:14px 16px;border-radius:6px;background:var(--fail-bg);border:1px solid #F3C9C4;margin-bottom:16px}
+.gate .st{font-size:20px;font-weight:600;color:var(--fail);white-space:nowrap}
+.gate p{margin:0;color:var(--ink2)}
+.checks{list-style:none;padding:0;margin:0}
+.checks li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #EDF0F3}
+.checks li:last-child{border-bottom:0}
+.checks .ok,.checks .no{flex:0 0 18px;height:18px;border-radius:50%;text-align:center;line-height:18px;font-size:12px;color:#fff;font-weight:700}
+.checks .ok{background:var(--pass)}.checks .no{background:var(--fail)}
+.checks small{display:block;color:var(--ink2)}
+
+.stat{font-size:13px;color:var(--ink2)}
+.stat b{color:var(--ink);font-weight:600}
+
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.kpi:nth-child(3){border-right:0}.g2,.g3,.g31{grid-template-columns:1fr}.diff{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:820px){body{grid-template-columns:1fr}.rail{position:static;height:auto}.rail nav{flex-direction:row;flex-wrap:wrap}.rail-foot{display:none}.compare{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<aside class="rail">
+  <div class="brand">Genie QA Dashboard<small>OREO test automation management · prototype</small></div>
+  <nav>
+    <button class="active" data-page="overview">Overview</button>
+    <button data-page="runs">Run history</button>
+    <button data-page="failures">Failure analysis <span class="n">7</span></button>
+    <button data-page="flaky">Stability</button>
+    <button data-page="coverage">Coverage &amp; test cases</button>
+    <button data-page="release">Release gate</button>
+    <button data-page="sync">Data sync</button>
+  </nav>
+  <div class="rail-foot">Source: genie-report-host<br>Last sync 2026-09-10 16:20<br>214 runs, 19,860 scenario results retained</div>
+</aside>
+
+<main>
+  <header class="filters">
+    <label>Project<select><option>com_scb_oreo_oreo-e2e</option><option>All projects</option></select></label>
+    <label>Release / GAID<select><option>All</option><option>OREO E2E POC (54982)</option></select></label>
+    <label>Date range<select><option>Last 90 days</option><option>Last 30 days</option><option>Last 180 days</option><option>Custom</option></select></label>
+    <label>Label<select><option>All</option><option>FullRegression</option><option>Smoke</option></select></label>
+    <label>Tag<input placeholder="@smoke, @FX_TRF, @TC-…"></label>
+    <label>Branch<select><option>All</option><option>main</option><option>feature/add-mock-config</option></select></label>
+    <button class="apply">Apply filters</button>
+  </header>
+
+  <!-- ================= Overview ================= -->
+  <section id="overview" class="page active">
+    <h1>Overview</h1>
+    <p class="lead">Answers one question: is automation healthy right now, and is it better or worse than a month ago. Backed by the <code>test_run</code> table, synced hourly.</p>
+
+    <div class="grid">
+      <div class="panel hero">
+        <div class="hero-top">
+          <div>
+            <h2>Every run in the last 180 days</h2>
+            <p>Each bar is one run; height is scenario count, colour is pass rate. Genie keeps 90 days — the left half only exists here.</p>
+          </div>
+          <div class="legend"><span><i style="background:var(--pass)"></i>≥ 98%</span><span><i style="background:var(--warn)"></i>90–98%</span><span><i style="background:var(--fail)"></i>&lt; 90%</span></div>
+        </div>
+        <div class="strip-wrap">
+          <div class="strip" id="strip"></div>
+          <div class="expired" id="expired"><span>Expired in Genie</span></div>
+          <div class="retained" id="retained"><span>Still in Genie → click a bar to open the original report</span></div>
+        </div>
+        <div class="months" id="months"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel flush"><div class="kpis" id="kpis"></div></div>
+    </div>
+
+    <div class="grid g3">
+      <div class="panel">
+        <div class="panel-h"><h2>Pass rate trend</h2><span class="hint">Per run; dashed line is the 98% gate</span></div>
+        <div id="trend"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Scenario count (coverage growth)</h2><span class="hint">grossTotal</span></div>
+        <div id="growth"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Feature health</h2><span class="hint">Aggregated over last 10 runs; click a feature to open its scenarios</span></div>
+        <table>
+          <thead><tr><th>Feature</th><th class="num">Scenarios</th><th>Pass rate, last 10 runs</th><th class="num">Avg duration</th><th class="num">Flaky</th><th>Latest</th><th>Trend</th></tr></thead>
+          <tbody id="features"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Run history ================= -->
+  <section id="runs" class="page">
+    <h1>Run history</h1>
+    <p class="lead">One row per run, kept forever. Filter by status, branch, user or Genie version; tick two runs to compare. Source: <code>POST /reports/project</code> + <code>GET /reports/details/{id}</code>.</p>
+
+    <div class="grid">
+      <div class="panel flush">
+        <div class="panel-h"><h2>214 runs</h2><span class="hint">Newest first</span></div>
+        <table>
+          <thead><tr><th></th><th>Started</th><th>Name</th><th>Status</th><th class="num">Passed / failed / skipped</th><th class="num">Duration</th><th>Branch @ commit</th><th>Genie version</th><th>User</th><th>Genie report</th><th>Label</th></tr></thead>
+          <tbody id="runlist"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="panel">
+        <div class="panel-h"><h2>Run duration trend</h2><span class="hint">runEndTime − runStartTime</span></div>
+        <div id="duration"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Environment &amp; version breakdown</h2><span class="hint">Last 30 days</span></div>
+        <table>
+          <thead><tr><th>Dimension</th><th>Value</th><th class="num">Runs</th><th class="num">Pass rate</th></tr></thead>
+          <tbody>
+            <tr><td>Genie version</td><td>5.0.0-RC7-SNAPSHOT</td><td class="num">38</td><td class="num">96.4%</td></tr>
+            <tr><td>Genie version</td><td>5.0.0-RC6</td><td class="num">9</td><td class="num">98.9%</td></tr>
+            <tr><td>Branch</td><td>main</td><td class="num">31</td><td class="num">97.8%</td></tr>
+            <tr><td>Branch</td><td>feature/add-mock-config</td><td class="num">16</td><td class="num">94.1%</td></tr>
+            <tr><td>Host</td><td>CNNGLYTFY3</td><td class="num">29</td><td class="num">95.9%</td></tr>
+            <tr><td>Host</td><td>jenkins-agent-07</td><td class="num">18</td><td class="num">98.2%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Failure analysis ================= -->
+  <section id="failures" class="page">
+    <h1>Failure analysis</h1>
+    <p class="lead">Failures are clustered by error signature so you see root causes before test cases. Category and Jira link are maintained by people in the <code>known_issue</code> table; everything else is extracted from the fragment's <code>result.error</code>.</p>
+
+    <div class="grid">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Current root causes · 4 signatures, 7 scenarios affected</h2><span class="hint">Latest run 2026-09-10 14:24</span></div>
+        <table>
+          <thead><tr><th>Error signature</th><th>Type</th><th>Category</th><th class="num">Scenarios</th><th>First seen</th><th class="num">Hits, 14 days</th><th>Jira</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><b>Cannot find command to respond</b><div class="id">com.microsoft.playwright.impl.Connection.dispatch</div></td><td><span class="badge b-warn">Connection</span></td><td><span class="badge b-warn">Environment</span></td><td class="num">3</td><td>08-28</td><td class="num">9</td><td class="id">Not linked</td><td class="actions"><button>Classify</button><button>Link Jira</button></td></tr>
+            <tr><td><b>Locator expected to contain text · Expected 156.1</b><div class="id">trade-detail-schedule-row-event-0-fixing-input</div></td><td><span class="badge b-fail">Assertion</span></td><td><span class="badge b-fail">Product defect</span></td><td class="num">1</td><td>09-10</td><td class="num">2</td><td><a href="#" class="link">OREO-1423</a></td><td class="actions"><button>Classify</button></td></tr>
+            <tr><td><b>Timeout 30000ms exceeded waiting for blotter row</b><div class="id">trade_cancellation.feature · 3 scenarios</div></td><td><span class="badge b-warn">Timeout</span></td><td><span class="badge b-skip">Script</span></td><td class="num">2</td><td>09-02</td><td class="num">6</td><td><a href="#" class="link">OREO-1401</a></td><td class="actions"><button>Classify</button></td></tr>
+            <tr><td><b>Checker notification not received via WebSocket</b><div class="id">TC-WS-NOTIF-UI-001</div></td><td><span class="badge b-fail">Assertion</span></td><td><span class="badge b-mute">Unclassified</span></td><td class="num">1</td><td>08-19</td><td class="num">5</td><td class="id">Not linked</td><td class="actions"><button>Classify</button><button>Link Jira</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Most failing scenarios</h2><span class="hint">Last 30 days</span></div>
+        <table>
+          <thead><tr><th>Test case</th><th class="num">Failures</th><th class="num">Consecutive</th><th>Last passed</th><th>Last 10 runs</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>TC-RISK-METRIC-DISPLAY-UI-002<div class="id">Risk Metric Display</div></td><td class="num">11</td><td class="num">6</td><td>08-27</td><td><span class="dots"><i></i><i></i><i></i><i></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></td><td><a href="#" class="link">Genie</a></td></tr>
+            <tr><td>TC-TRADE-CANCELLATION-UI-007<div class="id">Trade Cancellation E2E</div></td><td class="num">8</td><td class="num">4</td><td>09-04</td><td><span class="dots"><i></i><i class="f"></i><i></i><i></i><i></i><i></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></td><td><a href="#" class="link">Genie</a></td></tr>
+            <tr><td>TC-WS-NOTIF-UI-001<div class="id">Blotter persistence and publish UI</div></td><td class="num">7</td><td class="num">1</td><td>09-10</td><td><span class="dots"><i></i><i class="f"></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i></span></td><td><a href="#" class="link">Genie</a></td></tr>
+            <tr><td>TC-TRADE-CREATION-UI-015<div class="id">Trade Creation E2E</div></td><td class="num">5</td><td class="num">0</td><td>09-10</td><td><span class="dots"><i></i><i></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i></span></td><td><a href="#" class="link">Genie</a></td></tr>
+            <tr><td>TC-TRADE-FIXINGS-FX_TRF-UI-001<div class="id">Trade Fixings E2E</div></td><td class="num">2</td><td class="num">2</td><td>09-09</td><td><span class="dots"><i class="n"></i><i class="n"></i><i class="n"></i><i class="n"></i><i class="n"></i><i class="n"></i><i></i><i></i><i class="f"></i><i class="f"></i></span></td><td><a href="#" class="link">Genie</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Failure categories</h2><span class="hint">All failed scenarios, last 30 days</span></div>
+        <div id="category"></div>
+        <p class="stat" style="margin:10px 0 0">Environment issues account for 41% of failures — the recent pass-rate drop is mostly not a product problem. This ratio is the key input for the release decision.</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-h"><h2>Compare two runs</h2><span class="hint">Aligned by traceabilityScenarioId; script changes (hash differs) flagged separately</span></div>
+        <div class="compare">
+          <select><option>2026-09-10 14:24 · OREO Playwright · 89/93</option><option>2026-09-10 06:24 · 88/93</option></select>
+          <span class="vs">vs</span>
+          <select><option>2026-08-31 19:30 · OREO Playwright · 86/93</option><option>2026-08-28 19:30 · 90/92</option></select>
+        </div>
+        <div class="diff">
+          <div class="fail"><div class="v">2</div><div class="l">Newly failing</div></div>
+          <div><div class="v" style="color:var(--pass)">3</div><div class="l">Fixed</div></div>
+          <div><div class="v">4</div><div class="l">Still failing</div></div>
+          <div><div class="v">4</div><div class="l">New scenarios</div></div>
+          <div><div class="v">6</div><div class="l">Script changed</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Stability ================= -->
+  <section id="flaky" class="page">
+    <h1>Stability</h1>
+    <p class="lead">A test case is flaky when the script is unchanged (same hash) but the result keeps flipping between pass and fail. Flaky score = number of status flips in the last 20 runs / 19.</p>
+
+    <div class="grid g3">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Flaky test cases · 6</h2><span class="hint">Listed when score ≥ 0.15</span></div>
+        <table>
+          <thead><tr><th>Test case</th><th>Feature</th><th class="num">Score</th><th>Last 20 runs</th><th>Common error</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>TC-WS-NOTIF-UI-001</td><td class="id">Blotter persistence</td><td class="num"><span class="badge b-fail">0.42</span></td><td><span class="dots"><i></i><i class="f"></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i></i><i></i></span></td><td class="id">WebSocket notification not received</td><td class="actions"><button>Mark as known</button></td></tr>
+            <tr><td>TC-RISK-METRIC-DISPLAY-UI-002</td><td class="id">Risk Metric Display</td><td class="num"><span class="badge b-warn">0.32</span></td><td><span class="dots"><i></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i></i><i class="f"></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></td><td class="id">Cannot find command to respond</td><td class="actions"><button>Mark as known</button></td></tr>
+            <tr><td>TC-TRADE-ALLOCATION-UI-002</td><td class="id">Trade Allocation E2E</td><td class="num"><span class="badge b-warn">0.21</span></td><td><span class="dots"><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i></span></td><td class="id">Timeout waiting for blotter row</td><td class="actions"><button>Mark as known</button></td></tr>
+            <tr><td>TC-LOGIN-UI-001</td><td class="id">User Login</td><td class="num"><span class="badge b-mute">0.16</span></td><td><span class="dots"><i></i><i></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i class="f"></i><i></i></span></td><td class="id">Page load timeout</td><td class="actions"><button>Mark as known</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Flaky ratio trend</h2><span class="hint">Flaky scenarios / total scenarios, weekly</span></div>
+        <div id="flakytrend"></div>
+        <p class="stat" style="margin:10px 0 0">Target &lt; 3%. Currently <b>6.5%</b>, up 2.1 points month on month, mostly from Playwright connection-layer issues.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Coverage ================= -->
+  <section id="coverage" class="page">
+    <h1>Coverage &amp; test cases</h1>
+    <p class="lead">A test-case inventory keyed by TC ID (<code>traceabilityScenarioId</code>), accumulated across runs. Answers which cases are automated, how long since they last ran, and what the last result was.</p>
+
+    <div class="grid">
+      <div class="panel flush"><div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi"><div class="v">97</div><div class="l">Automated test cases</div><div class="d up">+6 this month</div></div>
+        <div class="kpi"><div class="v">93</div><div class="l">Scenarios in latest run</div><div class="d flat">4 filtered by tag</div></div>
+        <div class="kpi"><div class="v">3</div><div class="l">Not run in 14+ days</div><div class="d down">Confirm whether obsolete</div></div>
+        <div class="kpi"><div class="v">24 / 24</div><div class="l">@smoke cases automated</div><div class="d up">Smoke gate available</div></div>
+        <div class="kpi"><div class="v">1,184 h</div><div class="l">Manual hours saved, total</div><div class="d up">+186 h this month</div></div>
+      </div></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Tag coverage</h2><span class="hint">From scenario.tags</span></div>
+        <table>
+          <thead><tr><th>Tag</th><th class="num">Cases</th><th>Pass rate, last 10 runs</th></tr></thead>
+          <tbody id="tags"></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Manual hours saved (cumulative)</h2><span class="hint">Sum of manualEffort</span></div>
+        <div id="roi"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Test-case inventory</h2><span class="hint">Search by TC, feature, tag or last result; export to Excel</span></div>
+        <table>
+          <thead><tr><th>TC ID</th><th>Scenario</th><th>Feature</th><th>Tags</th><th>Last run</th><th>Last result</th><th class="num">30-day pass rate</th><th>Script location</th></tr></thead>
+          <tbody>
+            <tr><td>TC-TRADE-FIXINGS-FX_TRF-UI-001</td><td>FX_TRF trade detail uses online fixing refresh to populate missing fixings</td><td class="id">Trade Fixings E2E</td><td><span class="tag">@regression</span><span class="tag">@FX_TRF</span><span class="tag">@trade_lifecycle</span></td><td>09-10 14:24</td><td><span class="badge b-fail">Failed</span></td><td class="num">50%</td><td class="id">trade_fixings.feature:17</td></tr>
+            <tr><td>TC-RISK-METRIC-DISPLAY-UI-002</td><td>Risk metrics panel shows progressive updates during individual fallback</td><td class="id">Risk Metric Display</td><td><span class="tag">@smoke</span><span class="tag">@positive</span><span class="tag">@risk_metric_display</span></td><td>09-10 14:24</td><td><span class="badge b-fail">Failed</span></td><td class="num">63%</td><td class="id">risk_metric_display.feature:41</td></tr>
+            <tr><td>TC-TRADE-BLOTTER-UI-001</td><td>Save a custom blotter and see it added to the saved blotter list</td><td class="id">Blotter persistence</td><td><span class="tag">@smoke</span><span class="tag">@positive</span></td><td>09-10 14:24</td><td><span class="badge b-pass">Passed</span></td><td class="num">100%</td><td class="id">blotter.feature:9</td></tr>
+            <tr><td>TC-TRADE-PARTIAL-NOVATION-REMAINING-UI-001</td><td>Perform Partial Novation event for FX_TRF trade</td><td class="id">Trade Partial Novation</td><td><span class="tag">@regression</span><span class="tag">@FX_TRF</span></td><td>09-10 14:24</td><td><span class="badge b-pass">Passed</span></td><td class="num">100%</td><td class="id">partial_novation.feature:12</td></tr>
+            <tr><td>TC-PRODUCT-SCHEMA-UPLOAD-UI-004</td><td>Reject schema upload with invalid json</td><td class="id">Product Schema Upload</td><td><span class="tag">@regression</span><span class="tag">@negative</span></td><td>08-22 19:30</td><td><span class="badge b-skip">Skipped</span></td><td class="num">—</td><td class="id">schema_upload.feature:58</td></tr>
+            <tr><td>TC-USER-PREFERENCE-CONFIG-UI-003</td><td>Reset preferences to default</td><td class="id">User Preference Configuration</td><td><span class="tag">@regression</span></td><td><span class="badge b-warn">19 days ago</span></td><td class="id">—</td><td class="num">—</td><td class="id">user_preference.feature:33</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Release gate ================= -->
+  <section id="release" class="page">
+    <h1>Release gate</h1>
+    <p class="lead">Gives one clear verdict per release / GAID. Rules are configurable; by default the latest FullRegression run for the release is used. Source: <code>POST /reports/project</code> filtered by releaseName / gaid.</p>
+
+    <div class="gate">
+      <div class="st">Not passed</div>
+      <p>OREO E2E POC · GAID 54982 · based on the FullRegression run at 2026-09-10 14:24. 2 gate rules not met; one is an environment issue, so the test lead needs to decide on a waiver.</p>
+    </div>
+
+    <div class="grid g2">
+      <div class="panel">
+        <div class="panel-h"><h2>Gate rules</h2><span class="hint">Stored in release_gate_rule</span></div>
+        <ul class="checks">
+          <li><span class="ok">✓</span><div>All @smoke cases pass<small>24 / 24</small></div></li>
+          <li><span class="no">✕</span><div>Overall pass rate ≥ 98%<small>Currently 95.7% (89 / 93)</small></div></li>
+          <li><span class="no">✕</span><div>No unclassified failures<small>1 unclassified: TC-WS-NOTIF-UI-001</small></div></li>
+          <li><span class="ok">✓</span><div>No product-defect failures without a Jira link<small>1 product defect, linked to OREO-1423</small></div></li>
+          <li><span class="ok">✓</span><div>No new failures in the last 3 runs<small>All current failures first appeared before 08-28</small></div></li>
+          <li><span class="ok">✓</span><div>Run is on main<small>Runs from feature/add-mock-config are excluded from the gate</small></div></li>
+        </ul>
+      </div>
+      <div class="panel flush">
+        <div class="panel-h"><h2>Release history</h2><span class="hint">Final verdict and evidence run kept per release</span></div>
+        <table>
+          <thead><tr><th>Release</th><th>GAID</th><th>Verdict</th><th class="num">Pass rate</th><th>Evidence run</th><th>Decided by</th></tr></thead>
+          <tbody>
+            <tr><td>OREO E2E POC</td><td class="id">54982</td><td><span class="badge b-fail">Not passed</span></td><td class="num">95.7%</td><td class="id">09-10 14:24</td><td class="id">—</td></tr>
+            <tr><td>OREO R2.3</td><td class="id">7499405</td><td><span class="badge b-pass">Passed</span></td><td class="num">98.9%</td><td class="id">08-14 21:02</td><td class="id">2038149</td></tr>
+            <tr><td>OREO R2.2</td><td class="id">7425423</td><td><span class="badge b-warn">Waived</span></td><td class="num">96.8%</td><td class="id">07-17 20:15</td><td class="id">2038149</td></tr>
+            <tr><td>OREO R2.1</td><td class="id">7398110</td><td><span class="badge b-pass">Passed</span></td><td class="num">100%</td><td class="id">06-19 19:48</td><td class="id">1551974</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Data sync ================= -->
+  <section id="sync" class="page">
+    <h1>Data sync</h1>
+    <p class="lead">Is the dashboard data complete and fresh. Also watches reports about to expire in Genie and calls <code>_retain</code> automatically for the important ones.</p>
+
+    <div class="grid g31">
+      <div class="panel">
+        <div class="panel-h"><h2>Sync status</h2></div>
+        <p class="stat">Last run <b>2026-09-10 16:20</b>, took 42 s</p>
+        <p class="stat">New runs <b>3</b>, new scenario results <b>279</b></p>
+        <p class="stat">Errors <b>0</b>, token valid for <b>6 more days</b></p>
+        <p class="stat">Next <b>17:00</b> (hourly)</p>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Retained data</h2></div>
+        <p class="stat">Runs <b>214</b>, earliest 2026-03-14</p>
+        <p class="stat">Scenario results <b>19,860</b></p>
+        <p class="stat">Raw JSON <b>2.1 GB</b> (JSONB, includes steps and stack traces)</p>
+        <p class="stat">Projects <b>1</b>: com_scb_oreo_oreo-e2e</p>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Expiring in Genie within 7 days</h2><span class="hint">Auto-retain rule: runs used as release-gate evidence</span></div>
+        <p class="stat"><b>5</b> reports expiring, <b>1</b> auto-retained</p>
+        <p class="stat">08-14 21:02 · OREO R2.3 evidence run <span class="badge b-pass">Retained</span></p>
+        <p class="stat">08-12 19:30 · regular run <span class="badge b-mute">Not retained</span></p>
+        <p class="stat"><a href="#">View all</a></p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel flush">
+        <div class="panel-h"><h2>Sync log</h2></div>
+        <table>
+          <thead><tr><th>Time</th><th>Type</th><th class="num">Runs</th><th class="num">Scenarios</th><th class="num">Took</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>09-10 16:20</td><td>Incremental</td><td class="num">3</td><td class="num">279</td><td class="num">42 s</td><td><span class="badge b-pass">OK</span></td></tr>
+            <tr><td>09-10 15:20</td><td>Incremental</td><td class="num">0</td><td class="num">0</td><td class="num">3 s</td><td><span class="badge b-pass">OK</span></td></tr>
+            <tr><td>09-10 14:20</td><td>Incremental</td><td class="num">1</td><td class="num">93</td><td class="num">18 s</td><td><span class="badge b-pass">OK</span></td></tr>
+            <tr><td>09-10 02:00</td><td>Expiry check + auto-retain</td><td class="num">1</td><td class="num">—</td><td class="num">2 s</td><td><span class="badge b-pass">Retained 1</span></td></tr>
+            <tr><td>09-09 21:20</td><td>Incremental</td><td class="num">2</td><td class="num">186</td><td class="num">31 s</td><td><span class="badge b-warn">1 fragment succeeded after retry</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ---------- deterministic mock data ---------- */
+let seed=20260910;function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff}
+const DAY=86400000, today=new Date('2026-09-10T00:00:00');
+const runs=[];
+for(let d=180;d>=0;d--){
+  const dt=new Date(today-d*DAY); const dow=dt.getDay();
+  if(dow===0||dow===6){ if(rnd()>0.15) continue; }
+  const n=58+Math.floor((180-d)/180*35);
+  let pr=0.975+rnd()*0.025;
+  if(d>=116&&d<=122) pr=0.80+rnd()*0.05;
+  if(d===61||d===60) pr=0.88+rnd()*0.03;
+  if(d<=14) pr=0.92+rnd()*0.04;
+  if(d<=2) pr=0.955+rnd()*0.01;
+  const failed=Math.round(n*(1-pr)); const passed=n-failed;
+  runs.push({date:dt,n,passed,failed,pr:passed/n,dur:560+Math.round(n*1.9+rnd()*90)});
+}
+runs[runs.length-1]={date:today,n:93,passed:89,failed:4,pr:89/93,dur:712};
+
+/* ---------- hero strip ---------- */
+const strip=document.getElementById('strip'), maxN=Math.max(...runs.map(r=>r.n));
+runs.forEach(r=>{
+  const b=document.createElement('div'); b.className='bar';
+  b.style.height=(r.n/maxN*100)+'%';
+  b.style.background=r.pr>=0.98?'var(--pass)':r.pr>=0.90?'var(--warn)':'var(--fail)';
+  b.title=`${r.date.toISOString().slice(0,10)} · ${r.passed}/${r.n} passed (${(r.pr*100).toFixed(1)}%)`;
+  strip.appendChild(b);
+});
+const cutoff=runs.findIndex(r=>(today-r.date)/DAY<=90);
+document.getElementById('expired').style.width=(cutoff/runs.length*100)+'%';
+document.getElementById('retained').style.width=((runs.length-cutoff)/runs.length*100)+'%';
+document.getElementById('months').innerHTML=['Mar','Apr','May','Jun','Jul','Aug','Sep'].map(m=>`<span>${m}</span>`).join('');
+
+/* ---------- KPIs ---------- */
+const last=runs[runs.length-1], week=runs.filter(r=>(today-r.date)/DAY<=7), month=runs.filter(r=>(today-r.date)/DAY<=30&&(today-r.date)/DAY>7);
+const avg=a=>a.reduce((s,r)=>s+r.pr,0)/a.length;
+const wk=avg(week)*100, mo=avg(month)*100;
+document.getElementById('kpis').innerHTML=`
+<div class="kpi"><div class="v" style="color:var(--fail)">Failed</div><div class="l">Latest run · 09-10 14:24</div><div class="d">${last.passed} / ${last.n} passed</div></div>
+<div class="kpi"><div class="v">${wk.toFixed(1)}%</div><div class="l">7-day average pass rate</div><div class="d ${wk<mo?'down':'up'}">${wk<mo?'▼':'▲'} ${Math.abs(wk-mo).toFixed(1)} vs prior 30 days</div></div>
+<div class="kpi"><div class="v">93</div><div class="l">Scenarios (coverage)</div><div class="d up">▲ 4 this month</div></div>
+<div class="kpi"><div class="v">6</div><div class="l">Flaky test cases</div><div class="d down">▲ 2 this month</div></div>
+<div class="kpi"><div class="v">3</div><div class="l">Failures to classify</div><div class="d flat">1 older than 7 days</div></div>
+<div class="kpi"><div class="v">5</div><div class="l">Expiring in Genie, 7 days</div><div class="d flat">1 auto-retained</div></div>`;
+
+/* ---------- svg chart helpers ---------- */
+function lineChart(el,series,o){
+  const W=600,H=170,pl=40,pr=12,pt=12,pb=26,min=o.min,max=o.max;
+  const N=series[0].data.length;
+  const xs=i=>pl+i*(W-pl-pr)/(N-1), ys=v=>pt+(H-pt-pb)*(1-(v-min)/(max-min));
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}">`;
+  const ticks=o.ticks||[min,(min+max)/2,max];
+  ticks.forEach(t=>{s+=`<line class="grid-l" x1="${pl}" x2="${W-pr}" y1="${ys(t)}" y2="${ys(t)}"/><text x="${pl-6}" y="${ys(t)+4}" text-anchor="end">${o.fmt?o.fmt(t):t}</text>`});
+  if(o.ref!==undefined) s+=`<line x1="${pl}" x2="${W-pr}" y1="${ys(o.ref)}" y2="${ys(o.ref)}" stroke="var(--fail)" stroke-dasharray="4 4"/>`;
+  series.forEach(sr=>{
+    const d=sr.data.map((v,i)=>(i?'L':'M')+xs(i).toFixed(1)+' '+ys(v).toFixed(1)).join(' ');
+    if(sr.fill) s+=`<path d="${d} L${xs(N-1)} ${ys(min)} L${xs(0)} ${ys(min)} Z" fill="${sr.color}" opacity=".08"/>`;
+    s+=`<path d="${d}" fill="none" stroke="${sr.color}" stroke-width="2" stroke-linejoin="round"/>`;
+  });
+  (o.labels||[]).forEach(([i,t])=>{s+=`<text x="${xs(i)}" y="${H-8}" text-anchor="middle">${t}</text>`});
+  s+=`<line class="axis" x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}"/></svg>`;
+  el.innerHTML=s;
+}
+function barChart(el,data,o){
+  const W=600,H=170,pl=40,pr=12,pt=12,pb=26,max=o.max;
+  const N=data.length,bw=(W-pl-pr)/N;
+  const ys=v=>pt+(H-pt-pb)*(1-v/max);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}">`;
+  [0,max/2,max].forEach(t=>{s+=`<line class="grid-l" x1="${pl}" x2="${W-pr}" y1="${ys(t)}" y2="${ys(t)}"/><text x="${pl-6}" y="${ys(t)+4}" text-anchor="end">${o.fmt?o.fmt(t):t}</text>`});
+  data.forEach((v,i)=>{s+=`<rect x="${pl+i*bw+1}" y="${ys(v)}" width="${bw-2}" height="${H-pb-ys(v)}" fill="${o.color}"/>`});
+  (o.labels||[]).forEach(([i,t])=>{s+=`<text x="${pl+i*bw+bw/2}" y="${H-8}" text-anchor="middle">${t}</text>`});
+  s+=`<line class="axis" x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}"/></svg>`;
+  el.innerHTML=s;
+}
+function hbar(parts){
+  const t=parts.reduce((s,p)=>s+p[0],0);
+  return `<div class="bar-h">${parts.map(p=>`<i style="width:${p[0]/t*100}%;background:${p[1]}"></i>`).join('')}</div>`;
+}
+
+/* ---------- overview charts ---------- */
+const r90=runs.filter(r=>(today-r.date)/DAY<=180);
+const mlabels=[];['Apr','May','Jun','Jul','Aug','Sep'].forEach((m,k)=>{const i=r90.findIndex(r=>r.date.getMonth()===k+3);if(i>=0)mlabels.push([i,m])});
+lineChart(document.getElementById('trend'),[{data:r90.map(r=>r.pr*100),color:'var(--pass)',fill:true}],{min:75,max:100,ticks:[75,85,95,100],fmt:v=>v+'%',ref:98,labels:mlabels});
+lineChart(document.getElementById('growth'),[{data:r90.map(r=>r.n),color:'var(--accent)',fill:true}],{min:40,max:100,ticks:[40,70,100],labels:mlabels});
+lineChart(document.getElementById('duration'),[{data:r90.map(r=>r.dur/60),color:'var(--ink2)',fill:true}],{min:0,max:20,ticks:[0,10,20],fmt:v=>v+' min',labels:mlabels});
+
+/* ---------- feature health table ---------- */
+const feats=[
+ ['Trade Creation E2E',23,20,3,'12m 4s',1,'Failed','▼'],
+ ['Trade Cancellation E2E',16,13,3,'8m 53s',1,'Failed','▼'],
+ ['Trade Amendment E2E',10,10,0,'6m 11s',0,'Passed','—'],
+ ['Product Schema Upload',5,5,0,'3m 20s',0,'Passed','—'],
+ ['Trade Allocation E2E',5,5,0,'3m 32s',1,'Passed','▲'],
+ ['Product Compose',4,4,0,'2m 53s',0,'Passed','—'],
+ ['Trade Portfolio Reassignment E2E',4,4,0,'2m 40s',0,'Passed','—'],
+ ['Risk Metric Display',2,1,1,'1m 36s',1,'Failed','▼'],
+ ['Blotter persistence and publish UI',2,2,0,'1m 32s',1,'Passed','▲'],
+ ['User Login',1,1,0,'47s',1,'Passed','—'],
+];
+document.getElementById('features').innerHTML=feats.map(f=>`<tr><td><a href="#">${f[0]}</a></td><td class="num">${f[1]}</td><td>${hbar([[f[2]*10,'var(--pass)'],[f[3]*10,'var(--fail)']])}<span class="id">${Math.round(f[2]/(f[2]+f[3])*100)}%</span></td><td class="num">${f[4]}</td><td class="num">${f[5]||'—'}</td><td><span class="badge ${f[6]==='Passed'?'b-pass':'b-fail'}">${f[6]}</span></td><td class="${f[7]==='▼'?'down':f[7]==='▲'?'up':'flat'}">${f[7]}</td></tr>`).join('');
+
+/* ---------- run list ---------- */
+const rl=[
+ ['09-10 14:24','OREO Playwright','Failed',89,4,0,'11m 52s','feature/add-mock-config @ 2a0ddfc','5.0.0-RC7','2039813','12-09','FullRegression'],
+ ['09-10 06:24','OREO Playwright','Failed',88,5,0,'12m 03s','feature/add-mock-config @ 2a0ddfc','5.0.0-RC7','2039813','12-09','FullRegression'],
+ ['09-09 19:30','OREO Playwright','Failed',89,4,0,'11m 41s','main @ 9c1e4b0','5.0.0-RC7','jenkins','12-08','FullRegression'],
+ ['09-09 08:15','OREO Smoke','Passed',24,0,0,'3m 08s','main @ 9c1e4b0','5.0.0-RC7','jenkins','12-08','Smoke'],
+ ['09-08 19:30','OREO Playwright','Failed',90,3,0,'11m 36s','main @ 9c1e4b0','5.0.0-RC7','jenkins','12-07','FullRegression'],
+ ['08-31 19:30','OREO Playwright','Failed',86,7,0,'11m 29s','feature/add-mock-config @ 2a0ddfc','5.0.0-RC7','2038149','11-29','FullRegression'],
+ ['08-28 19:30','OREO Playwright','Passed',92,0,0,'11m 12s','main @ 7b3d201','5.0.0-RC6','jenkins','11-26','FullRegression'],
+ ['08-14 21:02','OREO Playwright · R2.3','Passed',88,1,0,'10m 58s','main @ 41a9f0c','5.0.0-RC6','2038149','Retained','FullRegression'],
+];
+document.getElementById('runlist').innerHTML=rl.map(r=>`<tr><td><input type="checkbox" aria-label="Select for comparison"></td><td>${r[0]}</td><td>${r[1]}</td><td><span class="badge ${r[2]==='Passed'?'b-pass':'b-fail'}">${r[2]}</span></td><td class="num"><span style="color:var(--pass)">${r[3]}</span> / <span style="color:var(--fail)">${r[4]}</span> / ${r[5]}</td><td class="num">${r[6]}</td><td class="id">${r[7]}</td><td class="id">${r[8]}</td><td class="id">${r[9]}</td><td><a href="#" class="link">Open</a> <span class="id">${r[10]==='Retained'?'· retained':'· expires '+r[10]}</span></td><td><span class="tag">${r[11]}</span></td></tr>`).join('');
+
+/* ---------- failure category ---------- */
+barChart(document.getElementById('category'),[41,27,22,10],{max:50,color:'var(--ink2)',fmt:v=>v+'%',labels:[[0,'Environment'],[1,'Product defect'],[2,'Script'],[3,'Unclassified']]});
+
+/* ---------- flaky trend ---------- */
+lineChart(document.getElementById('flakytrend'),[{data:[2.1,2.4,2.2,1.9,2.6,3.1,2.8,4.4,5.2,6.5],color:'var(--warn)',fill:true}],{min:0,max:8,ticks:[0,4,8],fmt:v=>v+'%',ref:3,labels:[[0,'Jul'],[4,'Aug'],[9,'Sep']]});
+
+/* ---------- tag coverage ---------- */
+const tags=[['@regression',93,[88,5]],['@smoke',24,[24,0]],['@positive',70,[67,3]],['@negative',23,[21,2]],['@FX_TRF',12,[9,3]],['@FX_CO',8,[8,0]],['@trade_lifecycle',31,[28,3]],['@playwright',93,[89,4]]];
+document.getElementById('tags').innerHTML=tags.map(t=>`<tr><td><span class="tag">${t[0]}</span></td><td class="num">${t[1]}</td><td>${hbar([[t[2][0],'var(--pass)'],[t[2][1],'var(--fail)']])}<span class="id">${Math.round(t[2][0]/(t[2][0]+t[2][1])*100)}%</span></td></tr>`).join('');
+
+/* ---------- roi ---------- */
+lineChart(document.getElementById('roi'),[{data:[120,236,368,512,668,822,998,1184],color:'var(--pass)',fill:true}],{min:0,max:1200,ticks:[0,600,1200],fmt:v=>v+' h',labels:[[0,'Feb'],[3,'May'],[7,'Sep']]});
+
+/* ---------- nav ---------- */
+document.querySelectorAll('.rail nav button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.rail nav button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  b.classList.add('active'); document.getElementById(b.dataset.page).classList.add('active');
+  window.scrollTo({top:0});
+}));
+</script>
+</body>
+</html>

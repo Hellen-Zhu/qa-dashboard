@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!--HEAD-->
+</helmet>
+<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; padding: 24px 26px; border: 1px solid var(--ln); border-radius: 12px; background: var(--p1); position: relative; overflow: hidden;">
+    <div style="{{ glow }}"></div>
+    <div style="display: flex; flex-direction: column; gap: 12px; position: relative;">
+      <span class="lbl">Release gate · OREO E2E POC · GAID 54982</span>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span class="{{ v.lamp }}" style="width: 12px; height: 12px;"></span>
+        <span class="m" style="font-size: 40px; font-weight: 600; letter-spacing: .02em; line-height: 1;">{{ v.word }}</span>
+      </div>
+      <span style="font-size: 14px; color: var(--ink2); max-width: 680px; text-wrap: pretty;">{{ v.text }}</span>
+      <span class="m" style="font-size: 11.5px; color: var(--ink3);">Evidence: FullRegression run 9 Sep 19:30 · main @ 9c1e4b0 · 89 / 93 · retained in Genie automatically</span>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; position: relative;">
+      <sc-if value="{{ v.canWaive }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ doWaive }}" style="height: 36px; padding: 0 16px; border: 0; border-radius: 6px; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600;">Waive pass-rate rule…</button>
+      </sc-if>
+      <sc-if value="{{ v.blocked }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ toTriage }}" style="height: 36px; padding: 0 16px; border: 1px solid var(--ln); border-radius: 6px; background: var(--p2); color: var(--ink); font-size: 13px;">Resolve in Triage →</button>
+        <span style="font-size: 11.5px; color: var(--ink3);">A waiver needs every failure categorised and every defect linked to Jira.</span>
+      </sc-if>
+      <sc-if value="{{ v.isWaived }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ undoWaive }}" style="height: 36px; padding: 0 16px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 13px;">Revoke waiver</button>
+      </sc-if>
+    </div>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; animation-delay: .08s;">
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px 10px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Gate rules</h2>
+        <span class="m" style="font-size: 12px; color: var(--ink2);">{{ passCount }} / 6 met</span>
+      </div>
+      <sc-for list="{{ rules }}" as="r" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 13px 20px; border-top: 1px solid var(--ln2);">
+          <span style="{{ r.mark }}">
+            <svg width="10" height="10" viewBox="0 0 10 10"><path d="{{ r.icon }}" style="fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+          </span>
+          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+            <span style="font-size: 13.5px; color: var(--ink);">{{ r.name }}</span>
+            <span style="font-size: 12px; color: var(--ink3);">{{ r.detail }}</span>
+          </div>
+          <span class="m" style="font-size: 12.5px; color: var(--ink2); padding-top: 1px;">{{ r.val }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px 10px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Release history</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Evidence runs are retained forever</span>
+      </div>
+      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1.3fr) 80px 110px 70px 96px; gap: 12px; padding: 8px 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln);">
+        <span>Release</span><span>GAID</span><span>Verdict</span><span style="text-align: right;">Pass</span><span>Decided by</span>
+      </div>
+      <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+        <div class="row" style="display: grid; grid-template-columns: minmax(0, 1.3fr) 80px 110px 70px 96px; gap: 12px; align-items: center; padding: 0 20px; height: 52px; border-bottom: 1px solid var(--ln2);">
+          <div style="display: flex; flex-direction: column;">
+            <span>{{ h.rel }}</span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">evidence {{ h.run }}</span>
+          </div>
+          <span class="m" style="font-size: 12px; color: var(--ink2);">{{ h.gaid }}</span>
+          <span style="display: flex; align-items: center; gap: 8px; font-size: 12.5px;"><span class="{{ h.lamp }}"></span>{{ h.verdict }}</span>
+          <span class="m" style="text-align: right;">{{ h.pr }}</span>
+          <span class="m" style="font-size: 12px; color: var(--ink2);">{{ h.by }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":900},"cats":{"editor":null},"waived":{"editor":null},"onWaive":{"editor":null},"onNav":{"editor":null}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { waived: false }; }
+  renderVals() {
+    const cats = this.props.cats ?? { conn: 'env', locator: 'defect', timeout: 'script', ws: null };
+    const waived = this.props.waived ?? this.state.waived;
+    const setWaived = this.props.onWaive ?? ((w) => this.setState({ waived: w }));
+    const JIRA = { conn: null, locator: 'OREO-1423', timeout: 'OREO-1401', ws: null };
+    const unclassified = Object.keys(cats).filter((k) => !cats[k]);
+    const defects = Object.keys(cats).filter((k) => cats[k] === 'defect');
+    const defectsNoJira = defects.filter((k) => !JIRA[k]);
+    const NAMES = { conn: 'Connection.dispatch', locator: 'Locator 156.1', timeout: 'Timeout blotter row', ws: 'TC-WS-NOTIF-UI-001' };
+    const CL = { env: 'environment', defect: 'product defect', script: 'script', data: 'data' };
+    const tally = {};
+    Object.keys(cats).forEach((k) => { const c = cats[k] ? CL[cats[k]] : 'unclassified'; tally[c] = (tally[c] || 0) + 1; });
+    const split = Object.keys(tally).map((c) => tally[c] + ' ' + c).join(', ');
+    const othersOk = !unclassified.length && !defectsNoJira.length;
+    const isWaived = waived && othersOk;
+    const rulesRaw = [
+      { name: 'All @smoke cases pass', detail: 'Smoke is the minimum bar for any release', val: '24 / 24', ok: true },
+      { name: 'Overall pass rate ≥ 98%', detail: (isWaived ? 'Waived · ' : '') + '4 failing: ' + split, val: '95.7%', ok: false, waived: isWaived },
+      { name: 'No unclassified failures', detail: unclassified.length ? 'Unclassified: ' + unclassified.map((k) => NAMES[k]).join(', ') : 'Every failing signature has a category', val: unclassified.length ? unclassified.length + ' open' : '0', ok: !unclassified.length },
+      { name: 'Every product defect is linked to Jira', detail: defectsNoJira.length ? 'Missing a Jira link: ' + defectsNoJira.map((k) => NAMES[k]).join(', ') : defects.length + ' defect' + (defects.length === 1 ? '' : 's') + ', linked to ' + defects.map((k) => JIRA[k]).join(', '), val: defectsNoJira.length ? defectsNoJira.length + ' unlinked' : 'OK', ok: !defectsNoJira.length },
+      { name: 'No new failures in the last 3 runs', detail: 'Every current failure first appeared on or before 3 Sep', val: 'OK', ok: true },
+      { name: 'Evidence run is on main', detail: 'The 10 Sep runs on feature/add-mock-config are excluded', val: 'main', ok: true }
+    ];
+    const rules = rulesRaw.map((r) => {
+      const state = r.ok ? 'ok' : r.waived ? 'waived' : 'fail';
+      const c = state === 'ok' ? 'var(--good)' : state === 'waived' ? 'var(--warn)' : 'var(--crit)';
+      return {
+        ...r,
+        icon: state === 'ok' ? 'M2 5.2l2 2L8 3' : state === 'waived' ? 'M2.5 5h5' : 'M2.5 2.5l5 5M7.5 2.5l-5 5',
+        mark: `display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; margin-top: 1px; color: ${c}; background: color-mix(in srgb, ${c} 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, ${c} 45%, transparent);`
+      };
+    });
+    const failing = rules.filter((r) => !r.ok && !r.waived).length;
+    const canWaive = !isWaived && othersOk;
+    const v = isWaived
+      ? { word: 'WAIVED', lamp: 'lamp a', text: 'Pass rate is 95.7%, below the 98% bar. Every failure is categorised and every product defect is linked to Jira, so the pass-rate rule is waived and recorded with the evidence run.', isWaived: true, canWaive: false, blocked: false }
+      : { word: 'NOT PASSED', lamp: 'lamp r', text: `${failing} of 6 rules not met. ` + (canWaive ? 'Only the pass-rate rule is failing. Every failure is categorised and every product defect has a Jira link, so the test lead can waive it.' : 'Categorise every failure and link every product defect to Jira before a waiver can be considered.'), isWaived: false, canWaive, blocked: !canWaive };
+    const glowC = isWaived ? '250,178,25' : '208,59,59';
+    return {
+      v, rules,
+      passCount: rulesRaw.filter((r) => r.ok).length,
+      glow: `position: absolute; left: -120px; top: -160px; width: 520px; height: 360px; background: radial-gradient(closest-side, rgba(${glowC},.14), transparent); pointer-events: none;`,
+      doWaive: () => setWaived(true),
+      undoWaive: () => setWaived(false),
+      toTriage: () => this.props.onNav && this.props.onNav('triage'),
+      history: [
+        { rel: 'OREO E2E POC', gaid: '54982', verdict: isWaived ? 'Waived' : 'Not passed', lamp: isWaived ? 'lamp a' : 'lamp r', pr: '95.7%', run: '9 Sep 19:30', by: isWaived ? 'you' : '—' },
+        { rel: 'OREO R2.3', gaid: '7499405', verdict: 'Passed', lamp: 'lamp g', pr: '98.9%', run: '14 Aug 21:02', by: '2038149' },
+        { rel: 'OREO R2.2', gaid: '7425423', verdict: 'Waived', lamp: 'lamp a', pr: '96.8%', run: '17 Jul 20:15', by: '2038149' },
+        { rel: 'OREO R2.1', gaid: '7398110', verdict: 'Passed', lamp: 'lamp g', pr: '100%', run: '19 Jun 19:48', by: '1551974' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

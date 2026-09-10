@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!--HEAD-->
+</helmet>
+<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+
+  <section class="rise" style="display: flex; flex-direction: column; gap: 8px;">
+    <span class="lbl">Test cases · keyed by traceabilityScenarioId</span>
+    <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 500; letter-spacing: -.02em;">97 automated cases, 3 of them gone quiet.</h1>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); animation-delay: .06s;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+      <div style="{{ k.style }}">
+        <span class="lbl">{{ k.l }}</span>
+        <span class="m" style="font-size: 26px; font-weight: 500; letter-spacing: -.03em; line-height: 1;">{{ k.v }}</span>
+        <span style="font-size: 12px; color: var(--ink3);">{{ k.d }}</span>
+      </div>
+    </sc-for>
+  </section>
+
+  <section class="rise" style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); overflow: hidden; animation-delay: .12s;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--ln);">
+      <div style="display: flex; align-items: center; gap: 8px; height: 32px; width: 320px; padding: 0 10px; border: 1px solid var(--ln); border-radius: 6px; background: var(--bg);">
+        <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" style="fill: none; stroke: var(--ink3); stroke-width: 1.5;"></circle><path d="M10.5 10.5l3.5 3.5" style="stroke: var(--ink3); stroke-width: 1.5; stroke-linecap: round;"></path></svg>
+        <input onInput="{{ onQ }}" placeholder="Filter by TC, feature or @tag" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink); font: inherit; font-size: 12.5px;">
+      </div>
+      <div style="display: flex; gap: 4px;">
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
+      </div>
+      <button style="margin-left: auto; height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 12.5px;">Export to Excel</button>
+    </div>
+    <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.8fr) minmax(0, 1fr) 96px 90px 70px; gap: 14px; padding: 9px 18px; border-bottom: 1px solid var(--ln);">
+      <span>TC ID</span><span>Scenario</span><span>Tags</span><span>Last run</span><span>Result</span><span style="text-align: right;">30d pass</span>
+    </div>
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+      <div class="row" style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.8fr) minmax(0, 1fr) 96px 90px 70px; gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--ln2);">
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+          <span class="m" style="font-size: 12px; overflow-wrap: anywhere;">{{ r.id }}</span>
+          <span class="m" style="font-size: 10.5px; color: var(--ink3);">{{ r.loc }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 12.5px; text-wrap: pretty;">{{ r.name }}</span>
+          <span style="font-size: 11.5px; color: var(--ink3);">{{ r.feat }}</span>
+        </div>
+        <span style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="2"><span class="m" style="font-size: 10.5px; color: var(--ink2); padding: 1px 6px; border: 1px solid var(--ln); border-radius: 4px;">{{ t }}</span></sc-for></span>
+        <span class="m" style="font-size: 12px; color: var(--ink2);">{{ r.last }}</span>
+        <span style="display: flex; align-items: center; gap: 7px; font-size: 12px;"><span class="{{ r.lamp }}"></span>{{ r.res }}</span>
+        <span class="m" style="font-size: 12px; text-align: right;">{{ r.pr }}</span>
+      </div>
+    </sc-for>
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 28px 18px; font-size: 12.5px; color: var(--ink3);">No test case matches that filter.</div>
+    </sc-if>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; animation-delay: .18s;">
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Tag coverage</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Pass rate, last 10 runs</span>
+      </div>
+      <sc-for list="{{ tags }}" as="t" hint-placeholder-count="8">
+        <div style="display: grid; grid-template-columns: 130px 40px minmax(0, 1fr) 44px; gap: 12px; align-items: center; height: 30px;">
+          <span class="m" style="font-size: 12px; color: var(--ink2);">{{ t.tag }}</span>
+          <span class="m" style="font-size: 12px; text-align: right; color: var(--ink3);">{{ t.n }}</span>
+          <div style="display: flex; gap: 2px; height: 6px;"><div style="{{ t.p }}"></div><div style="{{ t.f }}"></div></div>
+          <span class="m" style="font-size: 12px; text-align: right;">{{ t.pr }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Manual hours saved</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Cumulative, from Genie manualEffort</span>
+      </div>
+      <div style="flex: 1; display: flex; align-items: flex-end; gap: 10px; min-height: 180px; border-bottom: 1px solid var(--ln);">
+        <sc-for list="{{ roi }}" as="b" hint-placeholder-count="8">
+          <div style="flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px;">
+            <span class="m" style="font-size: 10.5px; color: var(--ink3);">{{ b.v }}</span>
+            <div style="{{ b.s }}"></div>
+          </div>
+        </sc-for>
+      </div>
+      <div class="m" style="display: flex; gap: 10px; margin-top: 8px; font-size: 10.5px; color: var(--ink3);">
+        <sc-for list="{{ roi }}" as="b" hint-placeholder-count="8"><span style="flex: 1; text-align: center;">{{ b.m }}</span></sc-for>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { q: '', f: 'all' }; }
+  renderVals() {
+    const q = this.state.q.trim().toLowerCase();
+    const f = this.state.f;
+    const all = Component.TCS.map(([id, name, feat, tags, last, res, pr, loc]) => ({
+      id, name, feat, tags, last, res, pr, loc,
+      lamp: res === 'Passed' ? 'lamp g' : res === 'Failed' ? 'lamp r' : res === 'Not run' ? 'lamp a' : 'lamp o'
+    }));
+    const rows = all.filter((r) => {
+      if (f === 'failed' && r.res !== 'Failed') return false;
+      if (f === 'stale' && r.res !== 'Not run' && r.res !== 'Skipped') return false;
+      if (f === 'smoke' && !r.tags.includes('@smoke')) return false;
+      return !q || (r.id + ' ' + r.name + ' ' + r.feat + ' ' + r.tags.join(' ')).toLowerCase().includes(q);
+    });
+    const chips = [['all', 'All'], ['failed', 'Failing'], ['stale', 'Stale 14d+'], ['smoke', '@smoke']].map(([id, label]) => ({
+      label, pick: () => this.setState({ f: id }),
+      style: 'height: 28px; padding: 0 10px; border-radius: 6px; font-size: 12px; ' + (f === id ? 'border: 1px solid var(--ink4); background: var(--p3); color: var(--ink);' : 'border: 1px solid transparent; background: transparent; color: var(--ink3);')
+    }));
+    const roiV = [120, 236, 368, 512, 668, 822, 998, 1184];
+    return {
+      rows, chips, empty: rows.length === 0,
+      onQ: (e) => this.setState({ q: e.target.value }),
+      kpis: [
+        { l: 'Automated cases', v: '97', d: '+6 this month' },
+        { l: 'In latest run', v: '93', d: '4 filtered out by tag' },
+        { l: 'Not run 14+ days', v: '3', d: 'Confirm whether obsolete' },
+        { l: '@smoke automated', v: '24/24', d: 'Smoke gate is complete' },
+        { l: 'Manual hours saved', v: '1,184', d: '+186 h this month' }
+      ].map((k, i) => ({ ...k, style: 'display: flex; flex-direction: column; gap: 10px; padding: 16px 18px;' + (i ? ' border-left: 1px solid var(--ln);' : '') })),
+      tags: [['@regression', 93, 88, 5], ['@smoke', 24, 24, 0], ['@positive', 70, 67, 3], ['@negative', 23, 21, 2], ['@FX_TRF', 12, 9, 3], ['@FX_CO', 8, 8, 0], ['@trade_lifecycle', 31, 28, 3], ['@playwright', 93, 89, 4]]
+        .map(([tag, n, p, fl]) => ({ tag, n, pr: Math.round(p / (p + fl) * 100) + '%', p: `flex: ${p}; background: var(--good); opacity: .6; border-radius: 3px;`, f: fl ? `flex: ${fl}; background: var(--crit); border-radius: 3px;` : 'display: none;' })),
+      roi: roiV.map((v, i) => ({ v: v.toLocaleString('en-US'), m: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'][i], s: `width: 100%; height: ${(v / 1300 * 100).toFixed(1)}%; max-height: 150px; border-radius: 3px 3px 0 0; background: var(--ink2); opacity: ${i === roiV.length - 1 ? 1 : .35};` }))
+    };
+  }
+}
+Component.TCS = [
+  ['TC-TRADE-FIXINGS-FX_TRF-UI-001', 'FX_TRF trade detail uses online fixing refresh to populate missing fixings', 'Trade Fixings E2E', ['@regression', '@FX_TRF'], '10 Sep 14:24', 'Failed', '50%', 'trade_fixings.feature:17'],
+  ['TC-RISK-METRIC-DISPLAY-UI-002', 'Risk metrics panel shows progressive updates during individual fallback', 'Risk Metric Display', ['@regression', '@risk_metric_display'], '10 Sep 14:24', 'Failed', '63%', 'risk_metric_display.feature:41'],
+  ['TC-TRADE-BLOTTER-UI-001', 'Save a custom blotter and see it added to the saved blotter list', 'Blotter persistence', ['@smoke', '@positive'], '10 Sep 14:24', 'Passed', '100%', 'blotter.feature:9'],
+  ['TC-TRADE-PARTIAL-NOVATION-REMAINING-UI-001', 'Perform Partial Novation event for FX_TRF trade', 'Trade Partial Novation', ['@regression', '@FX_TRF'], '10 Sep 14:24', 'Passed', '100%', 'partial_novation.feature:12'],
+  ['TC-PRODUCT-SCHEMA-UPLOAD-UI-004', 'Reject schema upload with invalid json', 'Product Schema Upload', ['@regression', '@negative'], '22 Aug 19:30', 'Skipped', '—', 'schema_upload.feature:58'],
+  ['TC-USER-PREFERENCE-CONFIG-UI-003', 'Reset preferences to default', 'User Preference Configuration', ['@regression'], '22 Aug 19:30', 'Not run', '—', 'user_preference.feature:33']
+];
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!--HEAD-->
+</helmet>
+<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+
+  <section class="rise" style="display: flex; flex-direction: column; gap: 8px;">
+    <span class="lbl">Data sync · hourly incremental, daily expiry watch at 02:00</span>
+    <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 500; letter-spacing: -.02em;">Complete and fresh. Next sync at 17:00.</h1>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); animation-delay: .06s;">
+    <sc-for list="{{ hops }}" as="h" hint-placeholder-count="4">
+      <div style="{{ h.style }}">
+        <div style="display: flex; align-items: center; gap: 8px;"><span class="lamp g"></span><span class="lbl" style="color: var(--ink2);">{{ h.name }}</span></div>
+        <span class="m" style="font-size: 22px; font-weight: 500; letter-spacing: -.02em;">{{ h.v }}</span>
+        <span style="font-size: 12px; color: var(--ink3);">{{ h.d }}</span>
+        <sc-if value="{{ h.arrow }}" hint-placeholder-val="{{ true }}">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="position: absolute; right: -9px; top: 50%; transform: translateY(-50%); z-index: 1;"><circle cx="9" cy="9" r="8.5" style="fill: var(--p1); stroke: var(--ln);"></circle><path d="M7.5 5.5l3.5 3.5-3.5 3.5" style="fill: none; stroke: var(--ink2); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+        </sc-if>
+      </div>
+    </sc-for>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; animation-delay: .12s;">
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px 10px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Sync log</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Every job, newest first</span>
+      </div>
+      <div class="lbl" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 50px 80px 50px minmax(0, 1.2fr); gap: 12px; padding: 8px 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln);">
+        <span>Time</span><span>Job</span><span style="text-align: right;">Runs</span><span style="text-align: right;">Scenarios</span><span style="text-align: right;">Took</span><span>Result</span>
+      </div>
+      <sc-for list="{{ log }}" as="l" hint-placeholder-count="5">
+        <div class="row" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 50px 80px 50px minmax(0, 1.2fr); gap: 12px; align-items: center; padding: 0 20px; height: 42px; border-bottom: 1px solid var(--ln2);">
+          <span class="m" style="font-size: 12px; color: var(--ink2);">{{ l.t }}</span>
+          <span style="font-size: 12.5px;">{{ l.k }}</span>
+          <span class="m" style="font-size: 12px; text-align: right;">{{ l.r }}</span>
+          <span class="m" style="font-size: 12px; text-align: right;">{{ l.s }}</span>
+          <span class="m" style="font-size: 12px; text-align: right; color: var(--ink2);">{{ l.d }}</span>
+          <span style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink2);"><span class="{{ l.lamp }}"></span>{{ l.res }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 18px 20px 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Expiring in Genie, next 7 days</h2>
+          <span class="m" style="font-size: 12px; color: var(--ink2);">{{ retainedCount }} / 5 retained</span>
+        </div>
+        <span style="font-size: 12px; color: var(--ink3);">The dashboard keeps its copy either way. Retain keeps the original Genie report alive for drill-down.</span>
+      </div>
+      <sc-for list="{{ exp }}" as="e" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 60px 96px; gap: 12px; align-items: center; padding: 0 20px; height: 50px; border-top: 1px solid var(--ln2);">
+          <div style="display: flex; flex-direction: column; min-width: 0;">
+            <span class="m" style="font-size: 12px;">{{ e.run }}</span>
+            <span style="font-size: 11.5px; color: var(--ink3);">{{ e.why }}</span>
+          </div>
+          <span class="m" style="font-size: 12px; color: var(--ink2); text-align: right;">{{ e.left }}</span>
+          <button onClick="{{ e.toggle }}" style="{{ e.btn }}">{{ e.btnText }}</button>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { kept: { r0: true } }; }
+  renderVals() {
+    const exp = Component.EXP.map(([id, run, why, left]) => {
+      const k = !!this.state.kept[id];
+      return {
+        run, why, left,
+        toggle: () => this.setState({ kept: { ...this.state.kept, [id]: !k } }),
+        btnText: k ? 'Retained ✓' : 'Retain',
+        btn: 'height: 28px; border-radius: 6px; font-size: 12px; ' + (k ? 'border: 1px solid var(--ln); background: var(--p3); color: var(--ink);' : 'border: 1px solid var(--ln); background: transparent; color: var(--ink2);')
+      };
+    });
+    const hops = [
+      { name: 'Genie Report API', v: '200 OK', d: 'Perm token valid for 6 more days' },
+      { name: 'Sync job', v: '3 s', d: 'Last run 16:20 · 0 errors · no new runs' },
+      { name: 'PostgreSQL', v: '19,860', d: 'Scenario results · 214 runs · 2.1 GB raw JSON' },
+      { name: 'Dashboard', v: '16:20', d: 'Views refreshed from the last sync' }
+    ].map((h, i, a) => ({ ...h, arrow: i < a.length - 1, style: 'position: relative; display: flex; flex-direction: column; gap: 8px; padding: 16px 20px;' + (i ? ' border-left: 1px solid var(--ln);' : '') }));
+    return {
+      exp, hops,
+      retainedCount: Object.values(this.state.kept).filter(Boolean).length,
+      log: [
+        ['10 Sep 16:20', 'Incremental', 0, 0, '3 s', 'OK', 'g'],
+        ['10 Sep 15:20', 'Incremental', 1, 93, '18 s', 'OK', 'g'],
+        ['10 Sep 07:20', 'Incremental', 1, 93, '19 s', 'OK', 'g'],
+        ['10 Sep 02:00', 'Expiry watch', 1, '—', '2 s', 'Auto-retained 1', 'g'],
+        ['9 Sep 20:20', 'Incremental', 1, 93, '31 s', '1 fragment page retried', 'a']
+      ].map(([t, k, r, s, d, res, l]) => ({ t, k, r, s, d, res, lamp: 'lamp ' + l }))
+    };
+  }
+}
+Component.EXP = [
+  ['r1', '13 Jun 19:30', 'FullRegression · main', '1 d'],
+  ['r2', '14 Jun 08:15', 'Smoke · main', '2 d'],
+  ['r3', '15 Jun 19:30', 'FullRegression · main', '3 d'],
+  ['r4', '16 Jun 19:30', 'FullRegression · feature/add-mock-config', '4 d'],
+  ['r0', '19 Jun 19:48', 'OREO R2.1 release evidence · auto-retained', '7 d']
+];
+</script>
+</body>
+</html>

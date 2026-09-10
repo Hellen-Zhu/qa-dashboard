@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!--HEAD-->
+</helmet>
+<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+
+  <section class="rise" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="lbl">Triage · latest run 10 Sep 14:24</span>
+      <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 500; letter-spacing: -.02em;">Root causes first, test cases second.</h1>
+      <span style="font-size: 13px; color: var(--ink3); max-width: 640px; text-wrap: pretty;">Failures are clustered by normalised error signature. The category you set here is what the release gate reads.</span>
+    </div>
+    <div class="m" style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--ink2);">
+      <span class="{{ queueLamp }}"></span>{{ queueText }}
+    </div>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); overflow: hidden; animation-delay: .06s;">
+    <div style="display: flex; flex-direction: column; border-right: 1px solid var(--ln);">
+      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--ln);">
+        <span>Signature</span><span style="text-align: right;">TCs 14d</span><span style="text-align: right;">Hits 14d</span>
+      </div>
+      <sc-for list="{{ sigs }}" as="s" hint-placeholder-count="4">
+        <div onClick="{{ s.select }}" style="{{ s.rowStyle }}">
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px; gap: 14px; align-items: start;">
+            <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+              <span style="font-size: 13.5px; font-weight: 500; color: var(--ink);">{{ s.title }}</span>
+              <span class="m" style="font-size: 11.5px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.where }}</span>
+            </div>
+            <span class="m" style="text-align: right; font-size: 13px;">{{ s.scen }}</span>
+            <span class="m" style="text-align: right; font-size: 13px;">{{ s.hits }}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="m" style="font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); padding: 3px 7px; border: 1px solid var(--ln); border-radius: 4px;">{{ s.type }}</span>
+            <span style="width: 1px; height: 14px; background: var(--ln); margin: 0 4px;"></span>
+            <sc-for list="{{ s.opts }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.pick }}" style="{{ o.style }}"><span style="{{ o.dot }}"></span>{{ o.label }}</button>
+            </sc-for>
+            <sc-if value="{{ s.needs }}" hint-placeholder-val="{{ false }}">
+              <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #F2A19B;"><span class="lamp r"></span>Needs a category</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 18px; padding: 18px 20px 20px; background: var(--bg);">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="lbl">Selected signature</span>
+        <div class="m" style="font-size: 12px; line-height: 1.6; color: var(--ink); padding: 12px 14px; border: 1px solid var(--ln); border-radius: 8px; background: var(--p1); white-space: pre-wrap; word-break: break-word;">{{ sel.raw }}</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">First seen</span><span class="m" style="font-size: 14px;">{{ sel.first }}</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">Jira</span><span class="m" style="font-size: 14px;">{{ sel.jira }}</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">Category</span><span style="font-size: 14px;">{{ sel.cat }}</span></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="lbl">Hits per day, last 14 days</span>
+        <div style="display: flex; align-items: flex-end; gap: 3px; height: 44px; border-bottom: 1px solid var(--ln);">
+          <sc-for list="{{ sel.days }}" as="d" hint-placeholder-count="14"><div style="{{ d }}"></div></sc-for>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <span class="lbl" style="margin-bottom: 6px;">Affected test cases · last 10 runs</span>
+        <sc-for list="{{ sel.tcs }}" as="t" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 34px; border-bottom: 1px solid var(--ln2);">
+            <a href="#" class="m" style="font-size: 12px; text-decoration: none;">{{ t.id }}</a>
+            <span style="display: flex; gap: 3px;"><sc-for list="{{ t.dots }}" as="x" hint-placeholder-count="10"><i style="{{ x }}"></i></sc-for></span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: auto;">
+        <button style="height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 12.5px;">Link Jira issue</button>
+        <button style="height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 12.5px;">Open stack in Genie ↗</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 16px; animation-delay: .12s;">
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">What the failures are</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Failed scenarios, last 30 days</span>
+      </div>
+      <div style="display: flex; gap: 2px; height: 10px;">
+        <sc-for list="{{ mix }}" as="c" hint-placeholder-count="4"><div style="{{ c.bar }}"></div></sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <sc-for list="{{ mix }}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 10px; height: 32px; border-bottom: 1px solid var(--ln2);">
+            <span style="{{ c.dot }}"></span>
+            <span style="flex: 1; color: var(--ink2);">{{ c.label }}</span>
+            <span class="m" style="font-size: 13px;">{{ c.pct }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 12.5px; color: var(--ink2); text-wrap: pretty;">{{ mixNote }}</p>
+    </div>
+
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px 12px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Most failing test cases</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Last 30 days · oldest run on the left</span>
+      </div>
+      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1fr) 60px 60px 70px 132px; gap: 12px; padding: 8px 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln);">
+        <span>Test case</span><span style="text-align: right;">Fails</span><span style="text-align: right;">In a row</span><span>Last pass</span><span>Last 10</span>
+      </div>
+      <sc-for list="{{ worst }}" as="w" hint-placeholder-count="5">
+        <div class="row" style="display: grid; grid-template-columns: minmax(0, 1fr) 60px 60px 70px 132px; gap: 12px; align-items: center; padding: 0 20px; height: 48px; border-bottom: 1px solid var(--ln2);">
+          <div style="display: flex; flex-direction: column; min-width: 0;">
+            <span class="m" style="font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ w.id }}</span>
+            <span style="font-size: 11.5px; color: var(--ink3);">{{ w.feat }}</span>
+          </div>
+          <span class="m" style="text-align: right;">{{ w.fails }}</span>
+          <span class="m" style="text-align: right; color: var(--ink2);">{{ w.row }}</span>
+          <span class="m" style="font-size: 12px; color: var(--ink2);">{{ w.last }}</span>
+          <span style="display: flex; gap: 3px;"><sc-for list="{{ w.dots }}" as="x" hint-placeholder-count="10"><i style="{{ x }}"></i></sc-for></span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":1120},"cats":{"editor":null},"onClassify":{"editor":null},"onNav":{"editor":null}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { sel: 'ws', cats: { conn: 'env', locator: 'defect', timeout: 'script', ws: null } };
+  }
+  renderVals() {
+    const cats = this.props.cats ?? this.state.cats;
+    const classify = this.props.onClassify ?? ((sig, c) => this.setState({ cats: { ...this.state.cats, [sig]: c } }));
+    const CAT = Component.CAT;
+    const dotsOf = (s) => s.split('').map((c) => `display: block; width: 9px; height: 9px; border-radius: 50%; background: ${c === 'f' ? 'var(--crit)' : c === 'p' ? 'var(--good)' : 'var(--p3)'}; opacity: ${c === 'p' ? .45 : 1};`);
+    const sigs = Component.SIGS.map((s) => {
+      const on = s.id === this.state.sel;
+      const cur = cats[s.id];
+      return {
+        ...s,
+        needs: !cur,
+        select: () => this.setState({ sel: s.id }),
+        rowStyle: 'display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--ln2); cursor: pointer; ' + (on ? 'background: var(--p2); box-shadow: inset 2px 0 0 var(--ink);' : ''),
+        opts: Object.keys(CAT).map((k) => ({
+          label: CAT[k].label,
+          pick: (e) => { if (e && e.stopPropagation) e.stopPropagation(); classify(s.id, cur === k ? null : k); },
+          dot: `width: 7px; height: 7px; border-radius: 2px; background: ${CAT[k].color}; opacity: ${cur === k ? 1 : .55};`,
+          style: 'display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border-radius: 5px; font-size: 12px; ' + (cur === k ? 'border: 1px solid var(--ink3); background: var(--p3); color: var(--ink);' : 'border: 1px solid transparent; background: transparent; color: var(--ink3);')
+        }))
+      };
+    });
+    const s = Component.SIGS.find((x) => x.id === this.state.sel);
+    const maxH = Math.max(...s.days);
+    const sel = {
+      raw: s.raw, first: s.first, jira: s.jira ?? 'Not linked',
+      cat: cats[s.id] ? CAT[cats[s.id]].label : 'Unclassified',
+      days: s.days.map((v) => `flex: 1; height: ${v ? Math.max(8, v / maxH * 100) : 3}%; border-radius: 2px 2px 0 0; background: ${v ? 'var(--ink2)' : 'var(--p3)'};`),
+      tcs: s.tcs.map(([id, d]) => ({ id, dots: dotsOf(d) }))
+    };
+    const share = { env: 0, defect: 0, script: 0, data: 0, none: 0 };
+    const W = { conn: 41, locator: 27, timeout: 22, ws: 10 };
+    Object.keys(W).forEach((k) => { share[cats[k] || 'none'] += W[k]; });
+    const top = Object.keys(CAT).sort((a, b) => share[b] - share[a])[0];
+    const mix = [...Object.keys(CAT), 'none'].filter((k) => share[k] > 0).map((k) => {
+      const color = k === 'none' ? 'var(--c0)' : CAT[k].color;
+      return {
+        label: k === 'none' ? 'Unclassified' : CAT[k].label, pct: share[k] + '%',
+        bar: `flex: ${share[k]}; background: ${color}; border-radius: 3px;`,
+        dot: `width: 8px; height: 8px; border-radius: 2px; background: ${color};`
+      };
+    });
+    const un = Object.values(cats).filter((c) => !c).length;
+    return {
+      sigs, sel, mix,
+      queueLamp: un ? 'lamp r' : 'lamp g',
+      queueText: un ? `${un} of 4 signatures need a category` : 'All 4 signatures categorised',
+      mixNote: top === 'env'
+        ? `Environment accounts for ${share.env}% of failures, so the recent pass-rate drop is mostly not a product problem. This split is the key input to the release decision.`
+        : `${CAT[top].label} is now the largest share at ${share[top]}%. This split is the key input to the release decision.`,
+      worst: Component.WORST.map(([id, feat, fails, row, last, d]) => ({ id, feat, fails, row, last, dots: dotsOf(d) }))
+    };
+  }
+}
+Component.CAT = {
+  env: { label: 'Environment', color: 'var(--c1)' },
+  defect: { label: 'Product defect', color: 'var(--c2)' },
+  script: { label: 'Script', color: 'var(--c3)' },
+  data: { label: 'Data', color: '#9085e9' }
+};
+Component.SIGS = [
+  { id: 'conn', title: 'Cannot find command to respond', where: 'com.microsoft.playwright.impl.Connection.dispatch', type: 'Connection', scen: 2, hits: 9, first: '31 Aug', jira: null,
+    raw: 'PlaywrightException: Cannot find command to respond: #\n  at com.microsoft.playwright.impl.Connection.dispatch', days: [0, 0, 1, 0, 1, 0, 0, 2, 0, 1, 1, 0, 2, 1],
+    tcs: [['TC-RISK-METRIC-DISPLAY-UI-002', 'pfppffffff'], ['TC-TRADE-CREATION-UI-015', 'pffppppppp']] },
+  { id: 'locator', title: 'Locator expected to contain text · Expected 156.1', where: 'trade-detail-schedule-row-event-0-fixing-input', type: 'Assertion', scen: 1, hits: 2, first: '3 Sep', jira: 'OREO-1423',
+    raw: 'Locator expected to contain text "#"\n  locator: [data-testid=trade-detail-schedule-row-event-0-fixing-input]', days: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    tcs: [['TC-TRADE-FIXINGS-FX_TRF-UI-001', 'nnnnfppppf']] },
+  { id: 'timeout', title: 'Timeout 30000ms exceeded waiting for blotter row', where: 'trade_cancellation.feature · 2 scenarios', type: 'Timeout', scen: 2, hits: 6, first: '2 Sep', jira: 'OREO-1401',
+    raw: 'TimeoutError: Timeout #ms exceeded.\n  waiting for locator(".blotter-row").first()', days: [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+    tcs: [['TC-TRADE-CANCELLATION-UI-007', 'pfppppffff'], ['TC-TRADE-ALLOCATION-UI-002', 'ppppfppppp']] },
+  { id: 'ws', title: 'Checker notification not received via WebSocket', where: 'TC-WS-NOTIF-UI-001', type: 'Assertion', scen: 1, hits: 5, first: '19 Aug', jira: null,
+    raw: 'AssertionError: expected notification "#" within #ms\n  at NotificationSteps.checkerIsNotified', days: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
+    tcs: [['TC-WS-NOTIF-UI-001', 'fppppfpppf']] }
+];
+Component.WORST = [
+  ['TC-RISK-METRIC-DISPLAY-UI-002', 'Risk Metric Display', 11, 6, '27 Aug', 'pfppffffff'],
+  ['TC-TRADE-CANCELLATION-UI-007', 'Trade Cancellation E2E', 8, 4, '4 Sep', 'pfppppffff'],
+  ['TC-WS-NOTIF-UI-001', 'Blotter persistence and publish UI', 7, 1, '9 Sep', 'fppppfpppf'],
+  ['TC-TRADE-CREATION-UI-015', 'Trade Creation E2E', 5, 0, '10 Sep', 'pffppppppp'],
+  ['TC-TRADE-FIXINGS-FX_TRF-UI-001', 'Trade Fixings E2E', 2, 1, '9 Sep', 'nnnnfppppf']
+];
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!--HEAD-->
+</helmet>
+<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+
+  <section class="rise" style="display: flex; flex-direction: column; gap: 8px;">
+    <span class="lbl">Stability · script unchanged, result flipping</span>
+    <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 500; letter-spacing: -.02em;">6 flaky test cases, up from 4 a month ago.</h1>
+    <span style="font-size: 13px; color: var(--ink3); max-width: 720px; text-wrap: pretty;">Score = status flips ÷ 19 over the last 20 runs with the same scenario hash. Listed from 0.15. A case that fails every run is broken, not flaky, and belongs in Triage.</span>
+  </section>
+
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; animation-delay: .06s;">
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); overflow: hidden;">
+      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1.5fr) 80px 200px minmax(0, 1fr) 108px; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--ln);">
+        <span>Test case</span><span>Score</span><span>Last 20 runs</span><span>Common error</span><span></span>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+        <div class="row" style="{{ r.style }}">
+          <div style="display: flex; flex-direction: column; min-width: 0;">
+            <span class="m" style="font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.id }}</span>
+            <span style="font-size: 11.5px; color: var(--ink3);">{{ r.feat }}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <span class="m" style="font-size: 13px;">{{ r.score }}</span>
+            <div style="height: 3px; border-radius: 2px; background: var(--p3);"><div style="{{ r.bar }}"></div></div>
+          </div>
+          <span style="display: flex; gap: 2px;"><sc-for list="{{ r.dots }}" as="x" hint-placeholder-count="20"><i style="{{ x }}"></i></sc-for></span>
+          <span style="font-size: 12px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.err }}</span>
+          <button onClick="{{ r.toggle }}" style="{{ r.btn }}">{{ r.btnText }}</button>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Flaky share, weekly</h2>
+        <span style="font-size: 12px; color: var(--ink3);">Flaky scenarios ÷ all scenarios · target under 3%</span>
+      </div>
+      <div class="m" style="display: flex; align-items: baseline; gap: 10px;"><span style="font-size: 32px; font-weight: 500; letter-spacing: -.03em;">6.5%</span><span style="font-size: 12px; color: var(--ink3);">▲ 2.1 pts month on month</span></div>
+      <div style="position: relative; height: 150px;">
+        <svg viewBox="0 0 1000 150" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
+          <path d="{{ ch.target }}" style="fill: none; stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke;"></path>
+          <path d="{{ ch.line }}" style="fill: none; stroke: var(--warn); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke;"></path>
+          <path d="{{ ch.dot }}" style="fill: none; stroke: var(--warn); stroke-width: 7; stroke-linecap: round; vector-effect: non-scaling-stroke;"></path>
+        </svg>
+        <span class="m" style="{{ ch.targetLbl }}">3% target</span>
+      </div>
+      <div class="m" style="display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink3);"><span>Jul</span><span>Aug</span><span>Sep</span></div>
+      <p style="margin: 0; font-size: 12.5px; color: var(--ink2); text-wrap: pretty;">Most of the rise comes from the Playwright connection layer (Connection.dispatch), not from product code.</p>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":820}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { known: {} }; }
+  renderVals() {
+    const rows = Component.ROWS.map(([id, feat, runs, err]) => {
+      const score = runs.split('').reduce((n, c, i, a) => n + (i && c !== a[i - 1] ? 1 : 0), 0) / (runs.length - 1);
+      const k = !!this.state.known[id];
+      return {
+        id, feat, err, score: score.toFixed(2),
+        bar: `width: ${Math.min(100, score / 0.5 * 100)}%; height: 3px; border-radius: 2px; background: ${score >= 0.3 ? 'var(--crit)' : 'var(--warn)'};`,
+        dots: runs.split('').map((c) => `display: block; width: 8px; height: 8px; border-radius: 50%; background: ${c === 'f' ? 'var(--crit)' : 'var(--good)'}; opacity: ${c === 'f' ? 1 : .4};`),
+        toggle: () => this.setState({ known: { ...this.state.known, [id]: !k } }),
+        btnText: k ? 'Known ✓' : 'Mark as known',
+        btn: 'height: 28px; padding: 0 10px; border-radius: 6px; font-size: 12px; ' + (k ? 'border: 1px solid var(--ln); background: var(--p3); color: var(--ink);' : 'border: 1px solid var(--ln); background: transparent; color: var(--ink2);'),
+        style: 'display: grid; grid-template-columns: minmax(0, 1.5fr) 80px 200px minmax(0, 1fr) 108px; gap: 14px; align-items: center; padding: 0 18px; height: 56px; border-bottom: 1px solid var(--ln2); ' + (k ? 'opacity: .5;' : '')
+      };
+    });
+    const vals = [2.1, 2.4, 2.2, 1.9, 2.6, 3.1, 2.8, 4.4, 5.2, 6.5];
+    const x = (i) => i / (vals.length - 1) * 1000, y = (v) => 8 + 134 * (1 - v / 8);
+    return {
+      rows,
+      ch: {
+        line: 'M' + vals.map((v, i) => x(i).toFixed(0) + ' ' + y(v).toFixed(1)).join(' L'),
+        target: `M0 ${y(3).toFixed(1)} H1000`,
+        dot: `M1000 ${y(6.5).toFixed(1)} h0.01`,
+        targetLbl: `position: absolute; left: 0; top: ${(y(3) / 150 * 100).toFixed(1)}%; transform: translateY(4px); font-size: 10.5px; color: var(--ink3);`
+      }
+    };
+  }
+}
+Component.ROWS = [
+  ['TC-WS-NOTIF-UI-001', 'Blotter persistence', 'ppfpppfpppfppppfpppf', 'WebSocket notification not received'],
+  ['TC-RISK-METRIC-DISPLAY-UI-002', 'Risk Metric Display', 'ppfppppfpppfppffffff', 'Cannot find command to respond'],
+  ['TC-TRADE-ALLOCATION-UI-002', 'Trade Allocation E2E', 'pppfppppfpppppfppppp', 'Timeout waiting for blotter row'],
+  ['TC-TRADE-CREATION-UI-015', 'Trade Creation E2E', 'ppppfppppppffppppppp', 'Cannot find command to respond'],
+  ['TC-LOGIN-UI-001', 'User Login', 'pppppfppppppppfppppp', 'Page load timeout'],
+  ['TC-PRODUCT-COMPOSE-UI-002', 'Product Compose', 'ppfppppppppppppfpppp', 'Timeout waiting for compose dialog']
+];
+</script>
+</body>
+</html>

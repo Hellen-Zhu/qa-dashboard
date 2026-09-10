@@ -1,0 +1,17 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "QA Control Room · clickable", "x": 0, "y": 0, "w": 1440, "h": 900, "expand": "fill", "is_interactive": true },
+    { "file": "Today.dc.html", "x": 0, "y": 1060, "w": 1228, "h": 1420, "is_interactive": true },
+    { "file": "Triage.dc.html", "x": 1328, "y": 1060, "w": 1228, "h": 1120, "is_interactive": true },
+    { "file": "Gate.dc.html", "x": 2656, "y": 1060, "w": 1228, "h": 900, "is_interactive": true },
+    { "file": "Runs.dc.html", "x": 0, "y": 2620, "w": 1228, "h": 1100, "is_interactive": true },
+    { "file": "Flaky.dc.html", "x": 1328, "y": 2620, "w": 1228, "h": 820, "is_interactive": true },
+    { "file": "Cases.dc.html", "x": 2656, "y": 2620, "w": 1228, "h": 1180, "is_interactive": true },
+    { "file": "Sync.dc.html", "x": 3984, "y": 2620, "w": 1228, "h": 900, "is_interactive": true }
+  ],
+  "annotations": [
+    { "id": "try-this", "x": 1540, "y": 0, "w": 360, "text": "Try the core loop\n\n1. Today → \"Triage 1 →\"\n2. Give \"Checker notification not received\" a category\n3. Release gate → the unclassified rule turns green and a waiver becomes possible\n\nClassify it as Product defect instead and the Jira rule fails, because that signature has no Jira link.\n\nKeys 1–7 switch views." },
+    { "id": "ux-changes", "x": 1540, "y": 330, "w": 360, "text": "What changed in the UX\n\n• Today leads with a verdict sentence and one next action, not six equal KPIs\n• Failure analysis → Triage: a split view where categorising is one click, feeding the gate live\n• Run comparison moved to Runs (tick two rows)\n• Colour is only a signal light; normal = dim, anomalies glow" }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

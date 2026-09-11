@@ -146,25 +146,52 @@ Three components, deliberately decoupled:
 
 ### 3.1 Technology stack
 
-| Layer | Choice | Why |
+Aligned with the team's existing trading frontend and backend stacks: the
+same foundations (language, framework versions, build, tests, packaging),
+taking only what this dashboard needs.
+
+**Backend**
+
+| Layer | Choice | Notes |
 |---|---|---|
-| Backend | Java 21 + Spring Boot 3 | Team language; Genie itself is Java (Cucumber + Playwright Java) |
-| Data access | MyBatis (MyBatis-Plus optional for simple CRUD tables) | SQL-first; heavy aggregation lives in views. Parameters only via `#{}`; dynamic sort columns are white-listed |
-| Migrations | Flyway | §4.3 becomes `V1__init.sql` |
-| Scheduling | Spring `@Scheduled` + ShedLock; Resilience4j for retry/backoff | Single active sync even with several instances |
-| Database | PostgreSQL 14+ | JSONB, arrays + GIN, window functions, materialized views |
-| Frontend | React + TypeScript + Vite | Prototype pages and data shapes port 1:1 |
-| UI components | Ant Design v5, themed with the prototype's tokens (`design/_head.html`) | Rich tables, selects, date ranges; Chinese docs. Pending §8: team's frontend skills (alternatives: shadcn/ui, or Vue 3 + Element Plus) |
-| Server state | TanStack Query | Caching, periodic refresh, invalidation after triage writes |
-| Charts | Hand-written SVG + `d3-scale` / `d3-shape` | The run strip, status dots and thin bars are custom marks; chart libraries fight the look |
-| Auth | Pluggable login filter; integrate the bank permission system later | Every logged-in user can read and write; all human changes are audited in `triage_log` |
+| Language / framework | Java 21, Spring Boot 3 | Company parent pom; same Spring Boot and dependency versions as the team |
+| Build | Maven multi-module: `server` (Spring Boot) + `web` (frontend) | Frontend built by `frontend-maven-plugin` and packaged into the server artefact |
+| Web API | Spring MVC, REST, Bean Validation | |
+| Data access | MyBatis (MyBatis-Plus optional for the simple human tables) | SQL-first; aggregation lives in views (§4.4). Parameters only via `#{}`; dynamic sort columns white-listed. `ArrayTypeHandler` for `text[]`, a small `PGobject` TypeHandler for `jsonb`. JPA is not used: queries are analytics, the sync is bulk upsert (`ON CONFLICT`), pages read views |
+| Database / migrations | PostgreSQL 14+, Flyway | §4.3 becomes `V1__init.sql` |
+| Scheduling | Spring `@Scheduled` + ShedLock (JDBC lock provider on PostgreSQL) | Single active sync even with several instances |
+| Resilience / cache | Resilience4j for Genie calls; Caffeine for the perm token | |
+| Security | Deferred for now; later reuse the team's Spring Security OAuth2 Resource Server + JWT/SSO setup | Until then everyone on the network can read and write; `triage_log` records the name the user enters in the UI |
+| API docs | SpringDoc OpenAPI | Also generates the frontend's TypeScript types (`openapi-typescript`) |
+| Tests / quality | JUnit 5, Spring Boot Test, Testcontainers (PostgreSQL), JaCoCo, Surefire, Failsafe | No H2: JSONB, arrays, window functions, materialized views and generated columns are PostgreSQL-only |
+| Packaging | Spring Boot executable JAR, deployed by the ADO pipeline | |
+
+**Frontend**
+
+| Layer | Choice | Notes |
+|---|---|---|
+| Framework / build | React 18 + TypeScript, Vite | Same as the team |
+| Styling / components | Tailwind CSS v4 + shadcn/ui | Theme = shadcn CSS variables mapped from the prototype tokens (`design/_head.html`). Data Table (TanStack Table) for Runs / Test cases, Command (cmdk) for ⌘K, Calendar + Popover for date ranges |
+| Server state | TanStack Query v5 | Caching, periodic refresh, invalidation after triage writes |
+| Routing / filters | React Router v6 | Global filters live in URL search params (shareable links) |
+| Client state | Zustand v5, UI preferences only | Filters are in the URL, server data in TanStack Query |
+| HTTP | axios | Interceptors for auth header and 401 handling, as in the team's app |
+| Icons | lucide-react | Stroke icons, matching the prototype |
+| Charts | Hand-written SVG + `d3-scale` / `d3-shape` | Run strip, status dots and thin bars are custom marks. shadcn Chart (Recharts) is acceptable for plain line/bar charts |
+| Tests | Vitest + React Testing Library + MSW | Prototype mock data becomes MSW handlers, so the UI can be built before the API exists |
+
+**Not used here** (in the team's stack for trading needs this dashboard does
+not have): Spring Cloud Gateway / WebFlux, gRPC / Protobuf, WebSocket / STOMP,
+Redis, Eureka, Drools, Spring Batch, Spring Data JPA, H2, OpenFin.
+**Later, if needed:** JEXL3 for user-configurable gate rules; an Airflow
+trigger for the sync if scheduled jobs must be centrally orchestrated.
 
 ### 3.2 Deployment
 
-Azure DevOps pipeline to our own server: Maven build (the frontend is built
-by `frontend-maven-plugin` and packaged into the Spring Boot jar) → tests →
-copy the jar to the server → restart the service. One deployable; PostgreSQL
-location is an open item (§8).
+Azure DevOps pipeline to our own server: Maven multi-module build (the `web`
+module builds the frontend, the `server` module packages it into the Spring
+Boot artefact) → unit and Testcontainers tests → copy the JAR to the server →
+restart the service. One deployable, using the existing PostgreSQL instance.
 
 ## 4. Data model
 
@@ -177,9 +204,9 @@ location is an open item (§8).
 2. **Raw JSON is split into its own tables.** Fact tables stay narrow and fast
    to scan; the raw payload is kept forever so new fields can be back-filled
    without going back to Genie (which may have expired the report).
-3. **Surrogate `bigint` keys plus business unique keys.** Whether Genie's
-   `runIdentifier` is globally unique is not confirmed yet (§8); single-column
-   numeric keys also keep MyBatis joins simple.
+3. **Surrogate `bigint` keys plus business unique keys.** Genie's
+   `runIdentifier` is globally unique and gets its own unique key; numeric
+   surrogate keys keep MyBatis joins simple and indexes small.
 4. **Status columns are `text` + `CHECK`, not PostgreSQL enums.** No custom
    MyBatis TypeHandler needed, and adding a value is a constraint change.
 5. **Aggregation lives in views.** Flaky scores, feature health and trends are
@@ -236,7 +263,7 @@ CREATE TABLE sync_log (
 CREATE TABLE test_run (
   id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   project_id       bigint NOT NULL REFERENCES project,
-  run_identifier   text NOT NULL,
+  run_identifier   text NOT NULL UNIQUE,            -- globally unique in Genie
   display_name     text,
   status           text NOT NULL CHECK (status IN ('passed','failed')),
   labels           text[] NOT NULL DEFAULT '{}',   -- FullRegression / Smoke
@@ -262,8 +289,7 @@ CREATE TABLE test_run (
   retained         boolean NOT NULL DEFAULT false,
   retained_at      timestamptz,
   genie_url        text,
-  synced_at        timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (project_id, run_identifier)
+  synced_at        timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX ON test_run (project_id, run_start_time DESC);
 CREATE INDEX ON test_run (project_id, release_name);
@@ -370,7 +396,7 @@ CREATE TABLE triage_log (                                  -- everyone can write
 CREATE TABLE release (
   id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   project_id   bigint NOT NULL REFERENCES project,
-  release_name text NOT NULL,                              -- Genie releaseName
+  release_name text NOT NULL,                              -- traceability.releaseName, set in the Genie run config
   gaid         text,
   display_name text,                                       -- "OREO R2.3"
   status       text NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
@@ -452,6 +478,94 @@ Other views, same approach:
 Gate rules are evaluated live in Java from these views; `gate_result` is only
 written when someone records a verdict.
 
+### 4.5 Linking to ADO test cases
+
+Observed in real data (2026-09-11):
+
+- The fragment's `traceabilityScenarioId` is `TC-PRODUCT-SCHEMA-UPLOAD-FX_TRF-UI-001`,
+  taken from the scenario name `[TC-…] …`.
+- The ADO Test Case title uses the same form,
+  `[TC-PRODUCT-SCHEMA-UPLOAD-FX_TRF-UI-001] should able to create …`; its
+  work item ID (16185261) is the ADO Test Case ID.
+- Fragment tags contain `@AB#16184670`, which is the ADO test plan ID
+  ("Release Test Plan - 1.0.1"), so each result can be tied to a plan.
+- `traceability.testDetails.linkages` is empty.
+- `scenario.name` in the fragment equals the ADO Test Case title, e.g.
+  `[TC-PRODUCT-SCHEMA-UPLOAD-FX_TRF-UI-001] should able to create FX_TRF product with valid json schema successfully`.
+- On a Scenario Outline the `@TC-…` tag is the template-level ID
+  (`@TC-PRODUCT-SCHEMA-UPLOAD-UI-001`), while the name expands
+  `<product_type>` per example row (`…-FX_CO-UI-001`, `…-FX_TRF-UI-001`).
+  ADO has one test case per expanded ID, so the name, not the tag, is the key.
+
+Approach: a read-only ADO sync (daily) that matches on the TC ID in the
+title. No change to the tests or to ADO.
+
+1. WIQL on project `FMQPR`: work item type `Test Case`, title contains `[TC-`
+   → IDs; fetch `System.Id, System.Title, System.State, System.ChangedDate`
+   in batches of 200 → upsert `ado_test_case`, parsing `tc_id` from the title
+   with `^\[(TC-[A-Za-z0-9_-]+)\]`.
+2. For every plan referenced by an `@AB#<planId>` tag: read the plan, its
+   suites and their test cases (Test Plans REST API) → `ado_test_plan`,
+   `ado_suite_member`.
+3. The link is computed by `v_tc_ado_link`, not stored, so a renamed ADO
+   title heals on the next sync. The view also lists ADO test cases that have
+   no automation.
+
+Matching rules, in order:
+
+| Rule | Condition | Result |
+|---|---|---|
+| 1. TC ID | `[TC-…]` parsed from `scenario.name` equals the one parsed from the ADO title | linked |
+| 1a. Title drift | rule 1 matched, but the normalised full titles differ | linked, flagged "title differs" |
+| 2. Full title | no `[TC-…]` on either side; normalised full titles are equal | linked (weak) |
+| 3. Ambiguous | one TC ID on several ADO test cases, or on several Genie scenarios | flagged for clean-up |
+| 4. None | nothing matches | "not in ADO" / "no automation" |
+
+Normalisation for full-title comparison: trim, collapse whitespace, compare
+case-insensitively, cut to 255 characters (the ADO title limit).
+
+Not used as keys: the `@TC-…` tag (template-level on outlines, see above) and
+`scenario.id` (`…feature:22` carries the example row's line number, which
+moves whenever the file is edited).
+
+Auth: a read-only ADO PAT (Work Items: Read, Test Management: Read), ideally
+on a service account, stored as a server secret.
+
+```sql
+CREATE TABLE ado_test_case (
+  work_item_id int PRIMARY KEY,               -- ADO Test Case ID, e.g. 16185261
+  tc_id        text,                          -- parsed from "[TC-…]" in the title; NULL if absent
+  title        text NOT NULL,
+  title_norm   text NOT NULL,                 -- normalised for rule 2 / 1a
+  state        text,
+  changed_at   timestamptz,
+  synced_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ON ado_test_case (tc_id);
+
+CREATE TABLE ado_test_plan (
+  plan_id    int PRIMARY KEY,                 -- 16184670
+  name       text NOT NULL,                   -- "Release Test Plan - 1.0.1"
+  start_date date,
+  end_date   date,
+  synced_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE ado_suite_member (
+  plan_id      int  NOT NULL REFERENCES ado_test_plan,
+  suite_id     int  NOT NULL,                 -- 16207330
+  suite_name   text,
+  work_item_id int  NOT NULL,
+  PRIMARY KEY (plan_id, suite_id, work_item_id)
+);
+-- plus scenario_result.ado_plan_id int, parsed from the @AB#<planId> tag
+```
+
+What this unlocks: coverage per plan and suite on the Test cases page ("N of
+M test cases in Sanity Suite are automated"), release pages that show the
+ADO plan name, and later (phase 3) writing automated results back to the ADO
+test points.
+
 ## 5. Sync job
 
 ### 5.1 Schedule and flow
@@ -476,8 +590,7 @@ that match an auto-retain rule (e.g. evidence run of a `gate_result`) get
 
 ### 5.2 Idempotency and failure handling
 
-- All writes are upserts keyed on `(project_id, run_identifier)` /
-  `(run_id, fragment_id)`.
+- All writes are upserts keyed on `run_identifier` / `(run_id, fragment_id)`.
 - The sync job never writes the human tables (`signature_triage`,
   `test_case_note`, `triage_log`, `gate_result`).
 - A run is only marked complete when all fragment pages succeeded; partial
@@ -542,17 +655,19 @@ tag, branch.
 - Service account vs personal PSID for the sync job; perm token lifetime.
 - Whether the `features` / `tags` aggregation in the Genie UI has an
   undocumented API; otherwise aggregate from fragments (current plan).
-- Hosting: the service is deployed to our server via ADO pipeline; where
-  PostgreSQL runs is still open.
-- Is Genie's `runIdentifier` globally unique or only unique per project?
-  (Schema assumes per project, which works either way.)
-- Scenarios without a TC ID: fall back to `scenario_uri` as the test-case key?
-- Raw JSON is kept forever (~2.1 GB today): confirm server disk capacity for
-  the expected run frequency.
-- Release display names ("OREO R2.3"): available from Genie, or maintained in
-  the dashboard?
-- Frontend skills in the team (React vs Vue) — decides Ant Design vs the
-  alternatives in §3.1.
-- Login: integrate the bank permission system (phase 3); until then every
-  logged-in user can read and write.
+- ADO sync (§4.5): a read-only ADO PAT, ideally on a service account;
+  confirm who issues it.
+- Scenarios with no `[TC-…]` in the name stay out of the ADO link and the
+  test-case inventory; decide whether every scenario must carry a TC ID.
+- Scenario Outlines must put every parameter that distinguishes example rows
+  into the `[TC-…]` part of the name; otherwise rows share one TC ID and
+  cannot map 1:1 to ADO test cases (rule 3).
+- Raw JSON volume: measure the real average fragment size (the 2.1 GB shown
+  in the prototype is mock data) and decide whether raw payloads need a
+  retention limit.
+- PostgreSQL: confirm the version of the existing instance (14+ assumed).
+- Release names: `traceability.releaseName` from the Genie run config (e.g.
+  "OREO E2E POC"); the ADO test plan name is available through the
+  `@AB#<planId>` tag.
+- Login / SSO: deferred.
 - Waiver on the release gate is out of scope for now.

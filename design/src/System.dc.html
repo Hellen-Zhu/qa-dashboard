@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!--HEAD-->
+</helmet>
+<div style="padding: 28px 32px 64px; display: flex; flex-direction: column; gap: 28px; min-height: 100vh;">
+
+  <section style="display: flex; flex-direction: column; gap: 12px;">
+    <span class="lbl">Design system · the source of truth for the React build</span>
+    <h1 class="t1">Tokens, type and controls.</h1>
+    <span class="sub" style="max-width: 780px;">Contrast ratios below are measured against the page (#0E1012). Two rules keep the system honest: only the three text inks may carry text, and every status colour has a separate mark step and text step.</span>
+  </section>
+
+  <section style="display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: start;">
+    <div style="display: flex; flex-direction: column;">
+      <h2 class="h2" style="padding-bottom: 12px;">Type ramp</h2>
+      <div style="border-top: 1px solid var(--ln);"></div>
+      <sc-for list="{{ ramp }}" as="t" hint-placeholder-count="7">
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 96px 116px; gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--ln2);">
+          <span style="{{ t.style }}">{{ t.sample }}</span>
+          <span class="m" style="font-size: 11px; color: var(--ink3); text-align: right;">{{ t.size }}</span>
+          <span class="lbl">{{ t.use }}</span>
+        </div>
+      </sc-for>
+      <span class="sub" style="padding-top: 12px;">Seven steps, nothing in between. Numerals sit in IBM Plex Mono with tabular figures so columns align.</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      <div style="display: flex; flex-direction: column;">
+        <h2 class="h2" style="padding-bottom: 12px;">Text inks</h2>
+        <div style="border-top: 1px solid var(--ln);"></div>
+        <sc-for list="{{ inks }}" as="i" hint-placeholder-count="3">
+          <div style="display: grid; grid-template-columns: 20px minmax(0, 1fr) 84px 56px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--ln2);">
+            <span style="{{ i.sw }}"></span>
+            <span style="{{ i.style }}">{{ i.name }}</span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">{{ i.hex }}</span>
+            <span class="m" style="font-size: 11px; text-align: right; color: var(--good-i);">{{ i.cr }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <h2 class="h2" style="padding-bottom: 12px;">Strokes · never text</h2>
+        <div style="border-top: 1px solid var(--ln);"></div>
+        <sc-for list="{{ strokes }}" as="s" hint-placeholder-count="3">
+          <div style="display: grid; grid-template-columns: 20px minmax(0, 1fr) 84px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--ln2);">
+            <span style="{{ s.sw }}"></span>
+            <span style="font-size: 12px; color: var(--ink2);">{{ s.name }}</span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">{{ s.hex }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start;">
+    <div style="display: flex; flex-direction: column;">
+      <h2 class="h2" style="padding-bottom: 12px;">Status · mark and ink</h2>
+      <div style="border-top: 1px solid var(--ln);"></div>
+      <sc-for list="{{ status }}" as="s" hint-placeholder-count="3">
+        <div style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--ln2);">
+          <span style="display: flex; align-items: center; gap: 6px;"><span class="{{ s.lamp }}"></span><span style="{{ s.bar }}"></span></span>
+          <span style="{{ s.inkStyle }}">{{ s.label }}</span>
+          <span class="m" style="font-size: 11px; color: var(--ink3);">{{ s.hexes }}</span>
+        </div>
+      </sc-for>
+      <span class="sub" style="padding-top: 12px;">The mark step is for lamps and bars, the ink step for text. A status colour never travels without its label.</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+      <h2 class="h2" style="padding-bottom: 12px;">Categorical · root cause</h2>
+      <div style="border-top: 1px solid var(--ln);"></div>
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: 20px minmax(0, 1fr) 84px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--ln2);">
+          <span style="{{ c.sw }}"></span>
+          <span style="font-size: 12px; color: var(--ink2);">{{ c.name }}</span>
+          <span class="m" style="font-size: 11px; color: var(--ink3);">{{ c.hex }}</span>
+        </div>
+      </sc-for>
+      <span class="sub" style="padding-top: 12px;">Fixed slot order, never cycled. Validated on this surface: worst adjacent colour-blind separation ΔE 9.4 against an ≥8 target, every slot over 3:1.</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; flex-direction: column;">
+        <h2 class="h2" style="padding-bottom: 12px;">Radius and rhythm</h2>
+        <div style="border-top: 1px solid var(--ln);"></div>
+        <div style="display: flex; align-items: flex-end; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--ln2);">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <span style="width: 44px; height: 32px; border: 1px solid var(--ln3); border-radius: 2px; background: var(--p2);"></span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">2 · nested</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <span style="width: 44px; height: 32px; border: 1px solid var(--ln3); border-radius: 4px; background: var(--p2);"></span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">4 · controls</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <span style="width: 44px; height: 32px; border: 1px solid var(--ln3); border-radius: 8px; background: var(--p2);"></span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">8 · plates</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <span style="width: 44px; height: 32px; border: 1px solid var(--ln3); border-radius: 999px; background: var(--p2);"></span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">full · pills</span>
+          </div>
+        </div>
+        <span class="sub" style="padding-top: 12px;">Block layout is a 4px scale: 4 · 8 · 12 · 16 · 20 · 24 · 28 · 32, and every control and table row height is a multiple of four — controls 28 · 32 · 36, rows 36 · 40 · 48 · 52 · 56. Two things stay optical rather than snapped to the grid: horizontal padding inside a control, and the small gap between a mark and the label it belongs to (5–7px). The 2px step is for data marks and for anything nested in a 4px container, where the inner radius has to be tighter than the outer.</span>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <h2 class="h2" style="padding-bottom: 12px;">Surfaces</h2>
+        <div style="border-top: 1px solid var(--ln);"></div>
+        <sc-for list="{{ surfaces }}" as="s" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 20px minmax(0, 1fr) 84px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--ln2);">
+            <span style="{{ s.sw }}"></span>
+            <span style="font-size: 12px; color: var(--ink2);">{{ s.name }}</span>
+            <span class="m" style="font-size: 11px; color: var(--ink3);">{{ s.hex }}</span>
+          </div>
+        </sc-for>
+        <span class="sub" style="padding-top: 12px;">A table of records sits flush on the page. Only a panel — a chart, a readout, a form — gets a plate.</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column;">
+    <h2 class="h2" style="padding-bottom: 12px;">Controls</h2>
+    <div class="plate" style="display: flex; flex-wrap: wrap; align-items: center; gap: 24px; padding: 24px;">
+      <button style="height: 36px; padding: 0 14px; border: 0; border-radius: var(--r1); background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600;">Primary action</button>
+      <button class="hov" style="height: 36px; padding: 0 14px; border: 1px solid var(--ln3); border-radius: var(--r1); background: var(--p2); color: var(--ink); font-size: 13px;">Secondary</button>
+      <button class="hov" style="height: 36px; padding: 0 14px; border: 1px solid var(--ln); border-radius: var(--r1); background: transparent; color: var(--ink2); font-size: 13px;">Ghost</button>
+      <span style="width: 1px; height: 32px; background: var(--ln);"></span>
+      <div style="display: flex; padding: 3px; border: 1px solid var(--ln); border-radius: var(--r1); background: var(--p1); gap: 2px;">
+        <button style="height: 28px; padding: 0 12px; border: 0; border-radius: 3px; background: var(--p3); color: var(--ink); font-size: 12px;">All</button>
+        <button style="height: 28px; padding: 0 12px; border: 0; border-radius: 3px; background: transparent; color: var(--ink2); font-size: 12px;">Failed</button>
+        <button style="height: 28px; padding: 0 12px; border: 0; border-radius: 3px; background: transparent; color: var(--ink2); font-size: 12px;">Passed</button>
+      </div>
+      <span style="width: 1px; height: 32px; background: var(--ln);"></span>
+      <div style="display: flex; align-items: center; gap: 8px; height: 32px; width: 220px; padding: 0 10px; border: 1px solid var(--ln3); border-radius: var(--r1); background: var(--p1);">
+        <svg width="13" height="13" viewBox="0 0 16 16" style="flex: none;"><circle cx="7" cy="7" r="4.5" style="fill: none; stroke: var(--ink3); stroke-width: 1.5;"></circle><path d="M10.5 10.5l3.5 3.5" style="stroke: var(--ink3); stroke-width: 1.5; stroke-linecap: round;"></path></svg>
+        <span style="font-size: 12px; color: var(--ink3);">Filter by TC or @tag</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="display: grid; place-items: center; width: 16px; height: 16px; border-radius: 3px; background: var(--ink);"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5.2l2 2L8 3" style="fill: none; stroke: var(--bg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path></svg></span>
+        <span style="display: grid; place-items: center; width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--ln3);"></span>
+        <span class="sub">Ticked · empty</span>
+      </div>
+      <span class="m" style="font-size: 11px; color: var(--ink3); padding: 2px 6px; border: 1px solid var(--ln3); border-radius: 3px;">⌘K</span>
+      <span class="lbl">Label · mono, uppercase, 0.09em</span>
+    </div>
+    <span class="sub" style="padding-top: 12px;">Every control shows a 2px focus ring on keyboard focus. Hit targets in the app are 28px and up; anything a phone would touch is 44px.</span>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sw = (c) => `display: block; width: 20px; height: 20px; border-radius: 3px; background: ${c}; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);`;
+    return {
+      ramp: [
+        { sample: 'Verdict', size: '44 / 600', use: 'Gate verdict', style: 'font-family: var(--mono); font-size: 44px; font-weight: 600; letter-spacing: -.02em; line-height: 1;' },
+        { sample: 'Page headline', size: '28 / 600', use: 'Page h1', style: 'font-size: 28px; font-weight: 600; letter-spacing: -.022em; line-height: 1.1;' },
+        { sample: 'Readout figure', size: '20 / 500', use: 'Small metric', style: 'font-family: var(--mono); font-size: 20px; font-weight: 500; letter-spacing: -.016em;' },
+        { sample: 'Section heading', size: '15 / 600', use: 'Panel h2', style: 'font-size: 15px; font-weight: 600;' },
+        { sample: 'Body and table rows', size: '13 / 400', use: 'Default', style: 'font-size: 13px;' },
+        { sample: 'Secondary and captions', size: '12 / 400', use: 'Sub text', style: 'font-size: 12px; color: var(--ink3);' },
+        { sample: 'FIELD LABEL', size: '11 / 500', use: 'Label caps', style: 'font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--ink3);' }
+      ],
+      inks: [
+        { name: 'Primary ink', hex: '#E9ECEF', cr: '16.1:1', sw: sw('#E9ECEF'), style: 'font-size: 13px; color: var(--ink);' },
+        { name: 'Secondary ink', hex: '#AEB5BD', cr: '9.2:1', sw: sw('#AEB5BD'), style: 'font-size: 13px; color: var(--ink2);' },
+        { name: 'Muted ink · labels, axes', hex: '#949BA3', cr: '6.8:1', sw: sw('#949BA3'), style: 'font-size: 13px; color: var(--ink3);' }
+      ],
+      strokes: [
+        { name: 'Structural hairline', hex: '#2A3037', sw: sw('#2A3037') },
+        { name: 'Row divider', hex: '#1F242A', sw: sw('#1F242A') },
+        { name: 'Strong stroke · inputs', hex: '#3A424B', sw: sw('#3A424B') }
+      ],
+      status: [
+        { label: 'Good · at or above target', lamp: 'lamp g', hexes: '0CA30C / 57C96B', bar: 'display: block; width: 22px; height: 8px; border-radius: 2px; background: var(--good);', inkStyle: 'font-size: 12px; color: var(--good-i);' },
+        { label: 'Warning · watch this', lamp: 'lamp a', hexes: 'FAB219 / FAB219', bar: 'display: block; width: 22px; height: 8px; border-radius: 2px; background: var(--warn);', inkStyle: 'font-size: 12px; color: var(--warn-i);' },
+        { label: 'Critical · blocks the gate', lamp: 'lamp r', hexes: 'D03B3B / EE8A82', bar: 'display: block; width: 22px; height: 8px; border-radius: 2px; background: var(--crit);', inkStyle: 'font-size: 12px; color: var(--crit-i);' }
+      ],
+      cats: [
+        { name: 'Environment', hex: '#3987E5', sw: sw('#3987e5') },
+        { name: 'Product defect', hex: '#D95926', sw: sw('#d95926') },
+        { name: 'Script', hex: '#199E70', sw: sw('#199e70') },
+        { name: 'Data', hex: '#9085E9', sw: sw('#9085e9') }
+      ],
+      surfaces: [
+        { name: 'Page', hex: '#0E1012', sw: sw('#0E1012') },
+        { name: 'Plate', hex: '#15181B', sw: sw('#15181B') },
+        { name: 'Row hover', hex: '#1B1F23', sw: sw('#1B1F23') },
+        { name: 'Selected', hex: '#23282D', sw: sw('#23282D') }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

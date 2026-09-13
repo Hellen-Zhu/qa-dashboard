@@ -9,19 +9,19 @@
 <helmet>
 <!--HEAD-->
 </helmet>
-<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+<div style="padding: 28px 32px 64px; display: flex; flex-direction: column; gap: 24px; min-height: 100vh;">
 
-  <section class="rise" style="display: flex; flex-direction: column; gap: 8px;">
+  <section class="rise" style="display: flex; flex-direction: column; gap: 12px;">
     <span class="lbl">Data sync · hourly incremental, daily expiry watch at 02:00</span>
-    <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 500; letter-spacing: -.02em;">Complete and fresh. Next sync at 17:00.</h1>
+    <h1 class="t1">Complete and fresh. Next sync at 17:00.</h1>
   </section>
 
-  <section class="rise" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); animation-delay: .06s;">
+  <section class="rise plate" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); animation-delay: .06s;">
     <sc-for list="{{ hops }}" as="h" hint-placeholder-count="4">
       <div style="{{ h.style }}">
-        <div style="display: flex; align-items: center; gap: 8px;"><span class="lamp g"></span><span class="lbl" style="color: var(--ink2);">{{ h.name }}</span></div>
-        <span class="m" style="font-size: 22px; font-weight: 500; letter-spacing: -.02em;">{{ h.v }}</span>
-        <span style="font-size: 12px; color: var(--ink3);">{{ h.d }}</span>
+        <div style="display: flex; align-items: center; gap: 8px;"><span class="lamp g"></span><span class="lbl">{{ h.name }}</span></div>
+        <span class="fig" style="font-size: 20px;">{{ h.v }}</span>
+        <span class="sub">{{ h.d }}</span>
         <sc-if value="{{ h.arrow }}" hint-placeholder-val="{{ true }}">
           <svg width="18" height="18" viewBox="0 0 18 18" style="position: absolute; right: -9px; top: 50%; transform: translateY(-50%); z-index: 1;"><circle cx="9" cy="9" r="8.5" style="fill: var(--p1); stroke: var(--ln);"></circle><path d="M7.5 5.5l3.5 3.5-3.5 3.5" style="fill: none; stroke: var(--ink2); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
         </sc-if>
@@ -29,19 +29,19 @@
     </sc-for>
   </section>
 
-  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; animation-delay: .12s;">
-    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px 10px;">
-        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Sync log</h2>
-        <span style="font-size: 12px; color: var(--ink3);">Every job, newest first</span>
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; animation-delay: .12s;">
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px;">
+        <h2 class="h2">Sync log</h2>
+        <span class="sub">Every job, newest first</span>
       </div>
-      <div class="lbl" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 50px 80px 50px minmax(0, 1.2fr); gap: 12px; padding: 8px 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln);">
+      <div class="lbl flush" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 50px 80px 50px minmax(0, 1.2fr); gap: 12px; padding: 8px 12px;">
         <span>Time</span><span>Job</span><span style="text-align: right;">Runs</span><span style="text-align: right;">Scenarios</span><span style="text-align: right;">Took</span><span>Result</span>
       </div>
       <sc-for list="{{ log }}" as="l" hint-placeholder-count="5">
-        <div class="row" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 50px 80px 50px minmax(0, 1.2fr); gap: 12px; align-items: center; padding: 0 20px; height: 42px; border-bottom: 1px solid var(--ln2);">
+        <div class="row" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 50px 80px 50px minmax(0, 1.2fr); gap: 12px; align-items: center; padding: 0 12px; height: 40px; border-bottom: 1px solid var(--ln2);">
           <span class="m" style="font-size: 12px; color: var(--ink2);">{{ l.t }}</span>
-          <span style="font-size: 12.5px;">{{ l.k }}</span>
+          <span style="font-size: 12px;">{{ l.k }}</span>
           <span class="m" style="font-size: 12px; text-align: right;">{{ l.r }}</span>
           <span class="m" style="font-size: 12px; text-align: right;">{{ l.s }}</span>
           <span class="m" style="font-size: 12px; text-align: right; color: var(--ink2);">{{ l.d }}</span>
@@ -50,29 +50,30 @@
       </sc-for>
     </div>
 
-    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
-      <div style="display: flex; flex-direction: column; gap: 4px; padding: 18px 20px 12px;">
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-          <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Expiring in Genie, next 7 days</h2>
+          <h2 class="h2">Expiring in Genie, next 7 days</h2>
           <span class="m" style="font-size: 12px; color: var(--ink2);">{{ retainedCount }} / 5 retained</span>
         </div>
-        <span style="font-size: 12px; color: var(--ink3);">The dashboard keeps its copy either way. Retain keeps the original Genie report alive for drill-down.</span>
+        <span class="sub">The dashboard keeps its copy either way. Retain keeps the original Genie report alive for drill-down.</span>
       </div>
+      <div style="border-top: 1px solid var(--ln);"></div>
       <sc-for list="{{ exp }}" as="e" hint-placeholder-count="5">
-        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 60px 96px; gap: 12px; align-items: center; padding: 0 20px; height: 50px; border-top: 1px solid var(--ln2);">
+        <div class="row" style="display: grid; grid-template-columns: minmax(0, 1fr) 62px 98px; gap: 12px; align-items: center; padding: 0 12px; height: 52px; border-bottom: 1px solid var(--ln2);">
           <div style="display: flex; flex-direction: column; min-width: 0;">
             <span class="m" style="font-size: 12px;">{{ e.run }}</span>
-            <span style="font-size: 11.5px; color: var(--ink3);">{{ e.why }}</span>
+            <span class="sub" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ e.why }}</span>
           </div>
           <span class="m" style="font-size: 12px; color: var(--ink2); text-align: right;">{{ e.left }}</span>
-          <button onClick="{{ e.toggle }}" style="{{ e.btn }}">{{ e.btnText }}</button>
+          <button onClick="{{ e.toggle }}" class="hov" style="{{ e.btn }}">{{ e.btnText }}</button>
         </div>
       </sc-for>
     </div>
   </section>
 </div>
 </x-dc>
-<script data-dc-script data-props='{"$preview":{"width":1228,"height":900}}'>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":920}}'>
 class Component extends DCLogic {
   constructor(p) { super(p); this.state = { kept: { r0: true } }; }
   renderVals() {
@@ -82,7 +83,7 @@ class Component extends DCLogic {
         run, why, left,
         toggle: () => this.setState({ kept: { ...this.state.kept, [id]: !k } }),
         btnText: k ? 'Retained ✓' : 'Retain',
-        btn: 'height: 28px; border-radius: 6px; font-size: 12px; ' + (k ? 'border: 1px solid var(--ln); background: var(--p3); color: var(--ink);' : 'border: 1px solid var(--ln); background: transparent; color: var(--ink2);')
+        btn: 'height: 28px; border-radius: var(--r1); font-size: 12px; ' + (k ? 'border: 1px solid var(--ln3); background: var(--p3); color: var(--ink);' : 'border: 1px solid var(--ln); background: transparent; color: var(--ink2);')
       };
     });
     const hops = [
@@ -90,7 +91,7 @@ class Component extends DCLogic {
       { name: 'Sync job', v: '3 s', d: 'Last run 16:20 · 0 errors · no new runs' },
       { name: 'PostgreSQL', v: '19,860', d: 'Scenario results · 214 runs · 2.1 GB raw JSON' },
       { name: 'Dashboard', v: '16:20', d: 'Views refreshed from the last sync' }
-    ].map((h, i, a) => ({ ...h, arrow: i < a.length - 1, style: 'position: relative; display: flex; flex-direction: column; gap: 8px; padding: 16px 20px;' + (i ? ' border-left: 1px solid var(--ln);' : '') }));
+    ].map((h, i, a) => ({ ...h, arrow: i < a.length - 1, style: 'position: relative; display: flex; flex-direction: column; gap: 12px; padding: 16px 20px;' + (i ? ' border-left: 1px solid var(--ln);' : '') }));
     return {
       exp, hops,
       retainedCount: Object.values(this.state.kept).filter(Boolean).length,

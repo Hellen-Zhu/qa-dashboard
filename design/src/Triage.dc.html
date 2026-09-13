@@ -9,57 +9,59 @@
 <helmet>
 <!--HEAD-->
 </helmet>
-<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+<div style="padding: 28px 32px 64px; display: flex; flex-direction: column; gap: 24px; min-height: 100vh;">
 
   <section class="rise" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;">
-    <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
       <span class="lbl">Triage · latest run 10 Sep 14:24</span>
-      <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 500; letter-spacing: -.02em;">Root causes first, test cases second.</h1>
-      <span style="font-size: 13px; color: var(--ink3); max-width: 640px; text-wrap: pretty;">Failures are clustered by normalised error signature. The category you set here is what the release gate reads.</span>
+      <h1 class="t1">Root causes first, test cases second.</h1>
+      <span class="sub" style="max-width: 660px;">Failures are clustered by normalised error signature. The category you set here is what the release gate reads.</span>
     </div>
-    <div class="m" style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--ink2);">
+    <div class="m" style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink2); flex: none;">
       <span class="{{ queueLamp }}"></span>{{ queueText }}
     </div>
   </section>
 
-  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); overflow: hidden; animation-delay: .06s;">
+  <section class="rise plate" style="display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); overflow: hidden; animation-delay: .06s;">
     <div style="display: flex; flex-direction: column; border-right: 1px solid var(--ln);">
-      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--ln);">
+      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1fr) 66px 66px; gap: 16px; padding: 8px 20px; border-bottom: 1px solid var(--ln);">
         <span>Signature</span><span style="text-align: right;">TCs 14d</span><span style="text-align: right;">Hits 14d</span>
       </div>
       <sc-for list="{{ sigs }}" as="s" hint-placeholder-count="4">
         <div onClick="{{ s.select }}" style="{{ s.rowStyle }}">
-          <div style="display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px; gap: 14px; align-items: start;">
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) 66px 66px; gap: 16px; align-items: start;">
             <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
-              <span style="font-size: 13.5px; font-weight: 500; color: var(--ink);">{{ s.title }}</span>
-              <span class="m" style="font-size: 11.5px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.where }}</span>
+              <span style="font-size: 13px; font-weight: 500;">{{ s.title }}</span>
+              <span class="m" style="font-size: 11px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.where }}</span>
             </div>
             <span class="m" style="text-align: right; font-size: 13px;">{{ s.scen }}</span>
             <span class="m" style="text-align: right; font-size: 13px;">{{ s.hits }}</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="m" style="font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); padding: 3px 7px; border: 1px solid var(--ln); border-radius: 4px;">{{ s.type }}</span>
-            <span style="width: 1px; height: 14px; background: var(--ln); margin: 0 4px;"></span>
-            <sc-for list="{{ s.opts }}" as="o" hint-placeholder-count="4">
-              <button onClick="{{ o.pick }}" style="{{ o.style }}"><span style="{{ o.dot }}"></span>{{ o.label }}</button>
-            </sc-for>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="m" style="font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); padding: 2px 7px; border: 1px solid var(--ln); border-radius: 3px;">{{ s.type }}</span>
+            <span style="width: 1px; height: 16px; background: var(--ln);"></span>
+            <div style="display: flex; gap: 4px;">
+              <sc-for list="{{ s.opts }}" as="o" hint-placeholder-count="4">
+                <button onClick="{{ o.pick }}" style="{{ o.style }}"><span style="{{ o.dot }}"></span>{{ o.label }}</button>
+              </sc-for>
+            </div>
             <sc-if value="{{ s.needs }}" hint-placeholder-val="{{ false }}">
-              <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #F2A19B;"><span class="lamp r"></span>Needs a category</span>
+              <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--crit-i);"><span class="lamp r"></span>Needs a category</span>
             </sc-if>
           </div>
         </div>
       </sc-for>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 18px; padding: 18px 20px 20px; background: var(--bg);">
+    <div style="display: flex; flex-direction: column; gap: 20px; padding: 20px; background: var(--bg);">
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <span class="lbl">Selected signature</span>
-        <div class="m" style="font-size: 12px; line-height: 1.6; color: var(--ink); padding: 12px 14px; border: 1px solid var(--ln); border-radius: 8px; background: var(--p1); white-space: pre-wrap; word-break: break-word;">{{ sel.raw }}</div>
+        <div class="m" style="font-size: 12px; line-height: 1.65; padding: 12px 14px; border: 1px solid var(--ln); border-radius: var(--r1); background: var(--p1); white-space: pre-wrap; word-break: break-word;">{{ sel.raw }}</div>
       </div>
       <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
-        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">First seen</span><span class="m" style="font-size: 14px;">{{ sel.first }}</span></div>
-        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">Jira</span><span class="m" style="font-size: 14px;">{{ sel.jira }}</span></div>
-        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">Category</span><span style="font-size: 14px;">{{ sel.cat }}</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">First seen</span><span class="m" style="font-size: 13px;">{{ sel.first }}</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">Jira</span><span class="m" style="font-size: 13px;">{{ sel.jira }}</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><span class="lbl">Category</span><span style="font-size: 13px;">{{ sel.cat }}</span></div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <span class="lbl">Hits per day, last 14 days</span>
@@ -67,56 +69,56 @@
           <sc-for list="{{ sel.days }}" as="d" hint-placeholder-count="14"><div style="{{ d }}"></div></sc-for>
         </div>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 2px;">
-        <span class="lbl" style="margin-bottom: 6px;">Affected test cases · last 10 runs</span>
+      <div style="display: flex; flex-direction: column;">
+        <span class="lbl" style="margin-bottom: 8px;">Affected test cases · last 10 runs</span>
         <sc-for list="{{ sel.tcs }}" as="t" hint-placeholder-count="2">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 34px; border-bottom: 1px solid var(--ln2);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 36px; border-bottom: 1px solid var(--ln2);">
             <a href="#" class="m" style="font-size: 12px; text-decoration: none;">{{ t.id }}</a>
             <span style="display: flex; gap: 3px;"><sc-for list="{{ t.dots }}" as="x" hint-placeholder-count="10"><i style="{{ x }}"></i></sc-for></span>
           </div>
         </sc-for>
       </div>
       <div style="display: flex; gap: 8px; margin-top: auto;">
-        <button style="height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 12.5px;">Link Jira issue</button>
-        <button style="height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 12.5px;">Open stack in Genie ↗</button>
+        <button class="hov" style="height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: var(--r1); background: transparent; color: var(--ink2); font-size: 12px;">Link Jira issue</button>
+        <button class="hov" style="height: 32px; padding: 0 12px; border: 1px solid var(--ln); border-radius: var(--r1); background: transparent; color: var(--ink2); font-size: 12px;">Open stack in Genie ↗</button>
       </div>
     </div>
   </section>
 
-  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 16px; animation-delay: .12s;">
-    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px; display: flex; flex-direction: column; gap: 16px;">
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 20px; animation-delay: .12s;">
+    <div class="plate" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: baseline;">
-        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">What the failures are</h2>
-        <span style="font-size: 12px; color: var(--ink3);">Failed scenarios, last 30 days</span>
+        <h2 class="h2">What the failures are</h2>
+        <span class="sub">Failed scenarios, last 30 days</span>
       </div>
       <div style="display: flex; gap: 2px; height: 10px;">
         <sc-for list="{{ mix }}" as="c" hint-placeholder-count="4"><div style="{{ c.bar }}"></div></sc-for>
       </div>
       <div style="display: flex; flex-direction: column;">
         <sc-for list="{{ mix }}" as="c" hint-placeholder-count="4">
-          <div style="display: flex; align-items: center; gap: 10px; height: 32px; border-bottom: 1px solid var(--ln2);">
+          <div style="display: flex; align-items: center; gap: 8px; height: 32px; border-bottom: 1px solid var(--ln2);">
             <span style="{{ c.dot }}"></span>
             <span style="flex: 1; color: var(--ink2);">{{ c.label }}</span>
             <span class="m" style="font-size: 13px;">{{ c.pct }}</span>
           </div>
         </sc-for>
       </div>
-      <p style="margin: 0; font-size: 12.5px; color: var(--ink2); text-wrap: pretty;">{{ mixNote }}</p>
+      <p class="sub" style="margin: 0; color: var(--ink2);">{{ mixNote }}</p>
     </div>
 
-    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1);">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px 12px;">
-        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Most failing test cases</h2>
-        <span style="font-size: 12px; color: var(--ink3);">Last 30 days · oldest run on the left</span>
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px;">
+        <h2 class="h2">Most failing test cases</h2>
+        <span class="sub">Last 30 days · oldest run on the left</span>
       </div>
-      <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 1fr) 60px 60px 70px 132px; gap: 12px; padding: 8px 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln);">
+      <div class="lbl flush" style="display: grid; grid-template-columns: minmax(0, 1fr) 62px 66px 74px 134px; gap: 12px; padding: 8px 12px;">
         <span>Test case</span><span style="text-align: right;">Fails</span><span style="text-align: right;">In a row</span><span>Last pass</span><span>Last 10</span>
       </div>
       <sc-for list="{{ worst }}" as="w" hint-placeholder-count="5">
-        <div class="row" style="display: grid; grid-template-columns: minmax(0, 1fr) 60px 60px 70px 132px; gap: 12px; align-items: center; padding: 0 20px; height: 48px; border-bottom: 1px solid var(--ln2);">
+        <div class="row" style="display: grid; grid-template-columns: minmax(0, 1fr) 62px 66px 74px 134px; gap: 12px; align-items: center; padding: 0 12px; height: 48px; border-bottom: 1px solid var(--ln2);">
           <div style="display: flex; flex-direction: column; min-width: 0;">
             <span class="m" style="font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ w.id }}</span>
-            <span style="font-size: 11.5px; color: var(--ink3);">{{ w.feat }}</span>
+            <span class="sub">{{ w.feat }}</span>
           </div>
           <span class="m" style="text-align: right;">{{ w.fails }}</span>
           <span class="m" style="text-align: right; color: var(--ink2);">{{ w.row }}</span>
@@ -128,7 +130,7 @@
   </section>
 </div>
 </x-dc>
-<script data-dc-script data-props='{"$preview":{"width":1228,"height":1120},"cats":{"editor":null},"onClassify":{"editor":null},"onNav":{"editor":null}}'>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":1160},"cats":{"editor":null},"onClassify":{"editor":null},"onNav":{"editor":null}}'>
 class Component extends DCLogic {
   constructor(p) {
     super(p);
@@ -138,7 +140,7 @@ class Component extends DCLogic {
     const cats = this.props.cats ?? this.state.cats;
     const classify = this.props.onClassify ?? ((sig, c) => this.setState({ cats: { ...this.state.cats, [sig]: c } }));
     const CAT = Component.CAT;
-    const dotsOf = (s) => s.split('').map((c) => `display: block; width: 9px; height: 9px; border-radius: 50%; background: ${c === 'f' ? 'var(--crit)' : c === 'p' ? 'var(--good)' : 'var(--p3)'}; opacity: ${c === 'p' ? .45 : 1};`);
+    const dotsOf = (s) => s.split('').map((c) => `display: block; width: 9px; height: 9px; border-radius: 50%; background: ${c === 'f' ? 'var(--crit)' : c === 'p' ? 'var(--good)' : 'var(--ln3)'}; opacity: ${c === 'p' ? .45 : 1};`);
     const sigs = Component.SIGS.map((s) => {
       const on = s.id === this.state.sel;
       const cur = cats[s.id];
@@ -146,12 +148,12 @@ class Component extends DCLogic {
         ...s,
         needs: !cur,
         select: () => this.setState({ sel: s.id }),
-        rowStyle: 'display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--ln2); cursor: pointer; ' + (on ? 'background: var(--p2); box-shadow: inset 2px 0 0 var(--ink);' : ''),
+        rowStyle: 'display: flex; flex-direction: column; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--ln2); cursor: pointer; ' + (on ? 'background: var(--p2); box-shadow: inset 2px 0 0 var(--ink);' : ''),
         opts: Object.keys(CAT).map((k) => ({
           label: CAT[k].label,
           pick: (e) => { if (e && e.stopPropagation) e.stopPropagation(); classify(s.id, cur === k ? null : k); },
-          dot: `width: 7px; height: 7px; border-radius: 2px; background: ${CAT[k].color}; opacity: ${cur === k ? 1 : .55};`,
-          style: 'display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border-radius: 5px; font-size: 12px; ' + (cur === k ? 'border: 1px solid var(--ink3); background: var(--p3); color: var(--ink);' : 'border: 1px solid transparent; background: transparent; color: var(--ink3);')
+          dot: `width: 7px; height: 7px; border-radius: 2px; background: ${CAT[k].color}; opacity: ${cur === k ? 1 : .5};`,
+          style: 'display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 9px; border-radius: var(--r1); font-size: 12px; ' + (cur === k ? 'border: 1px solid var(--ln3); background: var(--p3); color: var(--ink);' : 'border: 1px solid transparent; background: transparent; color: var(--ink3);')
         }))
       };
     });
@@ -160,7 +162,7 @@ class Component extends DCLogic {
     const sel = {
       raw: s.raw, first: s.first, jira: s.jira ?? 'Not linked',
       cat: cats[s.id] ? CAT[cats[s.id]].label : 'Unclassified',
-      days: s.days.map((v) => `flex: 1; height: ${v ? Math.max(8, v / maxH * 100) : 3}%; border-radius: 2px 2px 0 0; background: ${v ? 'var(--ink2)' : 'var(--p3)'};`),
+      days: s.days.map((v) => `flex: 1; height: ${v ? Math.max(8, v / maxH * 100) : 3}%; border-radius: 2px 2px 0 0; background: ${v ? 'var(--ink2)' : 'var(--ln3)'};`),
       tcs: s.tcs.map(([id, d]) => ({ id, dots: dotsOf(d) }))
     };
     const share = { env: 0, defect: 0, script: 0, data: 0, none: 0 };
@@ -172,7 +174,7 @@ class Component extends DCLogic {
       return {
         label: k === 'none' ? 'Unclassified' : CAT[k].label, pct: share[k] + '%',
         bar: `flex: ${share[k]}; background: ${color}; border-radius: 3px;`,
-        dot: `width: 8px; height: 8px; border-radius: 2px; background: ${color};`
+        dot: `width: 8px; height: 8px; border-radius: 2px; background: ${color}; flex: none;`
       };
     });
     const un = Object.values(cats).filter((c) => !c).length;
@@ -191,7 +193,7 @@ Component.CAT = {
   env: { label: 'Environment', color: 'var(--c1)' },
   defect: { label: 'Product defect', color: 'var(--c2)' },
   script: { label: 'Script', color: 'var(--c3)' },
-  data: { label: 'Data', color: '#9085e9' }
+  data: { label: 'Data', color: 'var(--c4)' }
 };
 Component.SIGS = [
   { id: 'conn', title: 'Cannot find command to respond', where: 'com.microsoft.playwright.impl.Connection.dispatch', type: 'Connection', scen: 2, hits: 9, first: '31 Aug', jira: null,

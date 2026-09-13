@@ -9,47 +9,47 @@
 <helmet>
 <!--HEAD-->
 </helmet>
-<div style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; background: var(--bg); min-height: 100vh;">
+<div style="padding: 28px 32px 64px; display: flex; flex-direction: column; gap: 24px; min-height: 100vh;">
 
   <section class="rise" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;">
-    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 760px;">
-      <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 780px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
         <span class="lamp r"></span>
-        <span class="lbl" style="color: var(--ink2);">Latest FullRegression · 10 Sep 14:24 · feature/add-mock-config @ 2a0ddfc</span>
+        <span class="lbl">Latest FullRegression · 10 Sep 14:24 · feature/add-mock-config @ 2a0ddfc</span>
       </div>
-      <h1 style="margin: 0; font-size: 30px; line-height: 1.15; font-weight: 500; letter-spacing: -.02em; text-wrap: balance;">{{ headline }}</h1>
+      <h1 class="t1">{{ headline }}</h1>
     </div>
     <div style="display: flex; align-items: center; gap: 8px; flex: none;">
-      <button style="height: 34px; padding: 0 14px; border: 1px solid var(--ln); border-radius: 6px; background: transparent; color: var(--ink2); font-size: 13px;">Open in Genie ↗</button>
-      <button onClick="{{ toTriage }}" style="height: 34px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600;">{{ cta }}</button>
+      <button class="hov" style="height: 36px; padding: 0 14px; border: 1px solid var(--ln); border-radius: var(--r1); background: transparent; color: var(--ink2); font-size: 13px;">Open in Genie ↗</button>
+      <button onClick="{{ toTriage }}" style="height: 36px; padding: 0 14px; border: 0; border-radius: var(--r1); background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600;">{{ cta }}</button>
     </div>
   </section>
 
-  <section class="rise" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); animation-delay: .06s;">
+  <section class="rise plate" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); animation-delay: .06s;">
     <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
       <div style="{{ k.style }}">
         <div style="display: flex; align-items: center; gap: 8px;"><span class="{{ k.lamp }}"></span><span class="lbl">{{ k.label }}</span></div>
-        <div class="m" style="font-size: 30px; font-weight: 500; letter-spacing: -.03em; line-height: 1;">{{ k.value }}<span style="font-size: 14px; color: var(--ink3); letter-spacing: 0;">{{ k.unit }}</span></div>
-        <div style="font-size: 12px; color: var(--ink3);">{{ k.note }}</div>
+        <div class="fig" style="font-size: 28px;">{{ k.value }}<span class="m" style="font-size: 13px; font-weight: 400; color: var(--ink3); letter-spacing: 0;">{{ k.unit }}</span></div>
+        <div class="sub">{{ k.note }}</div>
       </div>
     </sc-for>
   </section>
 
-  <section class="rise" style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px 14px; animation-delay: .12s;">
-    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 16px;">
+  <section class="rise plate" style="padding: 20px; animation-delay: .12s;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 20px;">
       <div style="display: flex; flex-direction: column; gap: 4px;">
-        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Every run, last 180 days</h2>
-        <span style="font-size: 12px; color: var(--ink3);">Bar height is scenario count; colour is pass rate. Genie keeps 90 days, so the hatched half exists only here.</span>
+        <h2 class="h2">Every run, last 180 days</h2>
+        <span class="sub">Bar height is scenario count; colour is pass rate. Genie keeps 90 days, so the hatched half exists only here.</span>
       </div>
-      <div class="m" style="display: flex; align-items: center; gap: 18px; padding: 8px 12px; border: 1px solid var(--ln); border-radius: 8px; background: var(--bg); font-size: 12px; white-space: nowrap;">
-        <span style="color: var(--ink);">{{ ro.date }}</span>
+      <div class="m" style="display: flex; align-items: center; gap: 16px; padding: 8px 12px; border: 1px solid var(--ln); border-radius: var(--r1); background: var(--bg); font-size: 12px; white-space: nowrap; flex: none;">
+        <span>{{ ro.date }}</span>
         <span><span style="color: var(--ink);">{{ ro.passed }}</span><span style="color: var(--ink3);"> / {{ ro.n }}</span></span>
         <span style="display: flex; align-items: center; gap: 6px;"><span class="{{ ro.lamp }}"></span>{{ ro.pr }}</span>
         <span style="color: var(--ink3);">{{ ro.dur }}</span>
         <span style="color: var(--ink2);">{{ ro.where }}</span>
       </div>
     </div>
-    <div onMouseLeave="{{ clearHi }}" style="position: relative; height: 132px;">
+    <div onMouseLeave="{{ clearHi }}" style="position: relative; height: 136px;">
       <div style="{{ expiredStyle }}">
         <span class="lbl" style="position: absolute; right: 10px; top: 4px; color: var(--ink2);">Expired in Genie</span>
       </div>
@@ -61,11 +61,11 @@
         </sc-for>
       </div>
     </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-      <div class="m" style="position: relative; flex: 1; height: 14px; font-size: 10.5px; color: var(--ink3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+      <div class="m" style="position: relative; flex: 1; height: 14px; font-size: 11px; color: var(--ink3);">
         <sc-for list="{{ months }}" as="mo" hint-placeholder-count="6"><span style="{{ mo.style }}">{{ mo.t }}</span></sc-for>
       </div>
-      <div style="display: flex; gap: 16px; font-size: 11.5px; color: var(--ink2); padding-left: 24px;">
+      <div style="display: flex; gap: 16px; font-size: 12px; color: var(--ink2); padding-left: 24px; flex: none;">
         <span style="display: flex; align-items: center; gap: 6px;"><span class="lamp g"></span>≥ 98%</span>
         <span style="display: flex; align-items: center; gap: 6px;"><span class="lamp a"></span>90–98%</span>
         <span style="display: flex; align-items: center; gap: 6px;"><span class="lamp r"></span>&lt; 90%</span>
@@ -73,50 +73,60 @@
     </div>
   </section>
 
-  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; animation-delay: .18s;">
-    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;">
-        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Pass rate per run</h2>
-        <span style="font-size: 12px; color: var(--ink3);">Dashed line is the 98% release gate</span>
+  <section class="rise" style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; animation-delay: .18s;">
+    <div class="plate" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px;">
+        <h2 class="h2">Pass rate per run</h2>
+        <span class="sub">Dashed line is the 98% release gate</span>
       </div>
-      <div style="position: relative; height: 170px; margin-left: 36px;">
-        <sc-for list="{{ trend.ticks }}" as="t" hint-placeholder-count="4"><span class="m" style="{{ t.style }}">{{ t.t }}</span></sc-for>
-        <svg viewBox="0 0 1000 170" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
+      <div onMouseLeave="{{ clearHi }}" style="position: relative; height: 176px; margin-left: 38px;">
+        <sc-for list="{{ trend.ticks }}" as="t" hint-placeholder-count="3"><span class="m" style="{{ t.style }}">{{ t.t }}</span></sc-for>
+        <svg viewBox="0 0 1000 176" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
           <path d="{{ trend.grid }}" style="fill: none; stroke: var(--ln2); stroke-width: 1; vector-effect: non-scaling-stroke;"></path>
-          <path d="{{ trend.area }}" style="fill: var(--ink); opacity: .022;"></path>
+          <path d="{{ trend.area }}" style="fill: var(--ink); opacity: .03;"></path>
           <path d="{{ trend.gate }}" style="fill: none; stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke;"></path>
-          <path d="{{ trend.line }}" style="fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke;"></path>
+          <path d="{{ trend.line }}" style="fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke;"></path>
           <path d="{{ trend.marker }}" style="fill: none; stroke: var(--ink2); stroke-width: 1; vector-effect: non-scaling-stroke;"></path>
         </svg>
+        <sc-if value="{{ cursor.show }}" hint-placeholder-val="{{ false }}">
+          <span class="m" style="{{ cursor.dotStyle }}"></span>
+          <span class="m" style="{{ cursor.style }}">{{ cursor.text }}</span>
+        </sc-if>
+        <div style="position: absolute; inset: 0; display: flex;">
+          <sc-for list="{{ zones }}" as="z" hint-placeholder-count="120"><div onMouseEnter="{{ z.hover }}" style="flex: 1; height: 100%; cursor: crosshair;"></div></sc-for>
+        </div>
       </div>
     </div>
-    <div style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); padding: 18px 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;">
-        <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Scenarios per run</h2>
+    <div class="plate" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px;">
+        <h2 class="h2">Scenarios per run</h2>
         <span class="m" style="font-size: 12px; color: var(--ink2);">58 → 93</span>
       </div>
-      <div style="position: relative; height: 170px; margin-left: 28px;">
+      <div onMouseLeave="{{ clearHi }}" style="position: relative; height: 176px; margin-left: 30px;">
         <sc-for list="{{ growth.ticks }}" as="t" hint-placeholder-count="3"><span class="m" style="{{ t.style }}">{{ t.t }}</span></sc-for>
-        <svg viewBox="0 0 1000 170" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
+        <svg viewBox="0 0 1000 176" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
           <path d="{{ growth.grid }}" style="fill: none; stroke: var(--ln2); stroke-width: 1; vector-effect: non-scaling-stroke;"></path>
-          <path d="{{ growth.area }}" style="fill: var(--ink); opacity: .022;"></path>
-          <path d="{{ growth.line }}" style="fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke;"></path>
+          <path d="{{ growth.area }}" style="fill: var(--ink); opacity: .03;"></path>
+          <path d="{{ growth.line }}" style="fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke;"></path>
           <path d="{{ growth.marker }}" style="fill: none; stroke: var(--ink2); stroke-width: 1; vector-effect: non-scaling-stroke;"></path>
         </svg>
+        <div style="position: absolute; inset: 0; display: flex;">
+          <sc-for list="{{ zones }}" as="z" hint-placeholder-count="120"><div onMouseEnter="{{ z.hover }}" style="flex: 1; height: 100%; cursor: crosshair;"></div></sc-for>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="rise" style="border: 1px solid var(--ln); border-radius: 10px; background: var(--p1); animation-delay: .24s;">
-    <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px 12px;">
-      <h2 style="margin: 0; font-size: 14px; font-weight: 600;">Feature health</h2>
-      <span style="font-size: 12px; color: var(--ink3);">Last 10 runs</span>
+  <section class="rise" style="display: flex; flex-direction: column; animation-delay: .24s;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px;">
+      <h2 class="h2">Feature health</h2>
+      <span class="sub">Scenario count is the latest run; pass rate covers the last 10 runs</span>
     </div>
-    <div class="lbl" style="display: grid; grid-template-columns: minmax(0, 2.4fr) 90px minmax(0, 2fr) 110px 70px 90px; gap: 16px; padding: 8px 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln);">
+    <div class="lbl flush" style="display: grid; grid-template-columns: minmax(0, 2.4fr) 92px minmax(0, 2fr) 112px 72px 92px; gap: 16px; padding: 8px 12px;">
       <span>Feature</span><span style="text-align: right;">Scenarios</span><span>Pass rate</span><span style="text-align: right;">Avg duration</span><span style="text-align: right;">Flaky</span><span>Latest</span>
     </div>
-    <sc-for list="{{ feats }}" as="f" hint-placeholder-count="10">
-      <div class="row" style="display: grid; grid-template-columns: minmax(0, 2.4fr) 90px minmax(0, 2fr) 110px 70px 90px; gap: 16px; align-items: center; padding: 0 20px; height: 40px; border-bottom: 1px solid var(--ln2);">
+    <sc-for list="{{ feats }}" as="f" hint-placeholder-count="11">
+      <div class="row" style="display: grid; grid-template-columns: minmax(0, 2.4fr) 92px minmax(0, 2fr) 112px 72px 92px; gap: 16px; align-items: center; padding: 0 12px; height: 40px; border-bottom: 1px solid var(--ln2);">
         <a href="#" style="text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ f.name }}</a>
         <span class="m" style="text-align: right; color: var(--ink2);">{{ f.n }}</span>
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -134,7 +144,7 @@
   </section>
 </div>
 </x-dc>
-<script data-dc-script data-props='{"$preview":{"width":1228,"height":1420},"unclassified":{"editor":null},"onNav":{"editor":null}}'>
+<script data-dc-script data-props='{"$preview":{"width":1228,"height":1480},"unclassified":{"editor":null},"onNav":{"editor":null}}'>
 class Component extends DCLogic {
   constructor(p) { super(p); this.state = { hi: null }; }
   renderVals() {
@@ -150,6 +160,7 @@ class Component extends DCLogic {
       hover: () => this.setState({ hi: i }),
       style: `width: 100%; height: ${(r.n / maxN * 100).toFixed(1)}%; border-radius: 2px 2px 0 0; background: ${col(r.pr)}; opacity: ${i === hi && hovering ? 1 : (r.pr >= 0.98 ? 0.32 : 0.95) * (hovering ? 0.6 : 1)};`
     }));
+    const zones = R.map((r, i) => ({ hover: () => this.setState({ hi: i }) }));
     const r = R[hi];
     const ro = {
       date: r.label, passed: r.passed, n: r.n, pr: (r.pr * 100).toFixed(1) + '%', lamp: lamp(r.pr),
@@ -161,16 +172,27 @@ class Component extends DCLogic {
     R.forEach((x, i) => { if (i === 0 || x.date.getMonth() !== R[i - 1].date.getMonth()) months.push({ i, t: MN[x.date.getMonth()] }); });
     const xp = (i) => i / (N - 1) * 1000;
     const chart = (vals, min, max, ticks, fmt, gate) => {
-      const yp = (v) => 6 + 158 * (1 - (v - min) / (max - min));
+      const yp = (v) => 8 + 160 * (1 - (v - min) / (max - min));
       const pts = vals.map((v, i) => xp(i).toFixed(1) + ' ' + yp(v).toFixed(1));
       return {
         line: 'M' + pts.join(' L'),
-        area: 'M' + pts.join(' L') + ` L1000 164 L0 164 Z`,
+        area: 'M' + pts.join(' L') + ' L1000 170 L0 170 Z',
         grid: ticks.map((t) => `M0 ${yp(t).toFixed(1)} H1000`).join(' '),
         gate: gate ? `M0 ${yp(gate).toFixed(1)} H1000` : '',
-        marker: hovering ? `M${xp(hi).toFixed(1)} 0 V164` : '',
-        ticks: ticks.map((t) => ({ t: fmt(t), style: `position: absolute; right: calc(100% + 8px); top: ${(yp(t) / 170 * 100).toFixed(1)}%; transform: translateY(-50%); font-size: 10.5px; color: var(--ink3);` }))
+        marker: hovering ? `M${xp(hi).toFixed(1)} 0 V170` : '',
+        yAt: yp,
+        ticks: ticks.map((t) => ({ t: fmt(t), style: `position: absolute; right: calc(100% + 8px); top: ${(yp(t) / 176 * 100).toFixed(1)}%; transform: translateY(-50%); font-size: 11px; color: var(--ink3);` }))
       };
+    };
+    const trend = chart(R.map((x) => x.pr * 100), 75, 100, [80, 90, 100], (t) => t + '%', 98);
+    const growth = chart(R.map((x) => x.n), 40, 100, [50, 75, 100], (t) => String(t));
+    const cx = Math.min(95, Math.max(5, hi / (N - 1) * 100));
+    const cy = trend.yAt(r.pr * 100) / 176 * 100;
+    const cursor = {
+      show: hovering,
+      text: r.label.replace(' 19:30', '').replace(' 14:24', '') + '  ' + (r.pr * 100).toFixed(1) + '%',
+      dotStyle: `position: absolute; left: ${cx.toFixed(2)}%; top: ${cy.toFixed(2)}%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: ${col(r.pr)}; box-shadow: 0 0 0 2px var(--p1);`,
+      style: `position: absolute; left: ${cx.toFixed(2)}%; top: -4px; transform: translateX(-50%); padding: 3px 8px; border: 1px solid var(--ln3); border-radius: var(--r1); background: var(--bg); color: var(--ink); font-size: 11px; white-space: nowrap; pointer-events: none;`
     };
     const un = this.props.unclassified ?? 1;
     const failing = R[last].n - R[last].passed;
@@ -182,12 +204,10 @@ class Component extends DCLogic {
       failStyle: f ? `flex: ${f}; background: var(--crit); border-radius: 3px;` : 'display: none;'
     }));
     return {
-      bars, ro, feats,
+      bars, ro, feats, zones, trend, growth, cursor,
       clearHi: () => this.setState({ hi: null }),
-      expiredStyle: `position: absolute; left: 0; top: 0; bottom: 0; width: ${(cutoff / N * 100).toFixed(2)}%; border-right: 1px dashed var(--ink3); background: repeating-linear-gradient(135deg, rgba(231,233,235,.045) 0 6px, transparent 6px 12px);`,
+      expiredStyle: `position: absolute; left: 0; top: 0; bottom: 0; width: ${(cutoff / N * 100).toFixed(2)}%; border-right: 1px dashed var(--ink3); background: repeating-linear-gradient(135deg, rgba(233,236,239,.05) 0 6px, transparent 6px 12px);`,
       months: months.map((m) => ({ t: m.t, style: `position: absolute; left: ${(m.i / N * 100).toFixed(1)}%;` })),
-      trend: chart(R.map((x) => x.pr * 100), 75, 100, [80, 90, 100], (t) => t + '%', 98),
-      growth: chart(R.map((x) => x.n), 40, 100, [50, 75, 100], (t) => String(t)),
       headline: un > 0
         ? `${R[last].passed} of ${R[last].n} passed. ${failing} failing across 4 root causes; ${un} still ${un === 1 ? 'needs' : 'need'} triage.`
         : `${R[last].passed} of ${R[last].n} passed. All ${failing} failures are triaged. The gate decision is next.`,
@@ -199,7 +219,7 @@ class Component extends DCLogic {
         { label: 'Flaky cases', value: '6', unit: '', note: '▲ 2 this month', lamp: 'lamp a' },
         { label: 'Needs triage', value: String(un), unit: '', note: un ? 'Blocks the release gate' : 'Queue is clear', lamp: un ? 'lamp r' : 'lamp g' },
         { label: 'Expiring in Genie', value: '5', unit: '', note: 'Within 7 days · 1 auto-retained', lamp: 'lamp o' }
-      ].map((k, i) => ({ ...k, style: 'display: flex; flex-direction: column; gap: 12px; padding: 16px 18px;' + (i ? ' border-left: 1px solid var(--ln);' : '') }))
+      ].map((k, i) => ({ ...k, style: 'display: flex; flex-direction: column; gap: 12px; padding: 16px 20px;' + (i ? ' border-left: 1px solid var(--ln);' : '') }))
     };
   }
   static runs() {
@@ -226,16 +246,16 @@ class Component extends DCLogic {
   }
 }
 Component.FEATS = [
-  ['Trade Creation E2E', 23, 20, 3, '12m 04s', 1, 'Passed'],
-  ['Trade Cancellation E2E', 16, 13, 3, '8m 53s', 0, 'Failed'],
-  ['Trade Fixings E2E', 4, 3, 1, '2m 58s', 0, 'Failed'],
-  ['Trade Amendment E2E', 10, 10, 0, '6m 11s', 0, 'Passed'],
-  ['Product Schema Upload', 5, 5, 0, '3m 20s', 0, 'Passed'],
-  ['Trade Allocation E2E', 5, 5, 0, '3m 32s', 1, 'Passed'],
-  ['Product Compose', 4, 4, 0, '2m 53s', 1, 'Passed'],
-  ['Trade Portfolio Reassignment E2E', 4, 4, 0, '2m 40s', 0, 'Passed'],
-  ['Risk Metric Display', 2, 1, 1, '1m 36s', 1, 'Failed'],
-  ['Blotter persistence and publish UI', 2, 1, 1, '1m 32s', 1, 'Failed'],
+  ['Trade Creation E2E', 28, 20, 3, '12m 04s', 1, 'Passed'],
+  ['Trade Cancellation E2E', 19, 13, 3, '8m 53s', 0, 'Failed'],
+  ['Trade Fixings E2E', 5, 3, 1, '2m 58s', 0, 'Failed'],
+  ['Trade Amendment E2E', 12, 10, 0, '6m 11s', 0, 'Passed'],
+  ['Product Schema Upload', 6, 5, 0, '3m 20s', 0, 'Passed'],
+  ['Trade Allocation E2E', 6, 5, 0, '3m 32s', 1, 'Passed'],
+  ['Product Compose', 5, 4, 0, '2m 53s', 1, 'Passed'],
+  ['Trade Portfolio Reassignment E2E', 5, 4, 0, '2m 40s', 0, 'Passed'],
+  ['Risk Metric Display', 3, 1, 1, '1m 36s', 1, 'Failed'],
+  ['Blotter persistence and publish UI', 3, 1, 1, '1m 32s', 1, 'Failed'],
   ['User Login', 1, 1, 0, '47s', 1, 'Passed']
 ];
 </script>

@@ -1,17 +1,19 @@
 {
   "artboards": [
     { "file": "Main.dc.html", "title": "QA Control Room · clickable", "x": 0, "y": 0, "w": 1440, "h": 900, "expand": "fill", "is_interactive": true },
-    { "file": "Today.dc.html", "x": 0, "y": 1060, "w": 1228, "h": 1420, "is_interactive": true },
-    { "file": "Triage.dc.html", "x": 1328, "y": 1060, "w": 1228, "h": 1120, "is_interactive": true },
-    { "file": "Gate.dc.html", "x": 2656, "y": 1060, "w": 1228, "h": 900, "is_interactive": true },
-    { "file": "Runs.dc.html", "x": 0, "y": 2620, "w": 1228, "h": 1100, "is_interactive": true },
-    { "file": "Flaky.dc.html", "x": 1328, "y": 2620, "w": 1228, "h": 820, "is_interactive": true },
-    { "file": "Cases.dc.html", "x": 2656, "y": 2620, "w": 1228, "h": 1180, "is_interactive": true },
-    { "file": "Sync.dc.html", "x": 3984, "y": 2620, "w": 1228, "h": 900, "is_interactive": true }
+    { "file": "Today.dc.html", "x": 0, "y": 1060, "w": 1228, "h": 1480, "is_interactive": true },
+    { "file": "Triage.dc.html", "x": 1328, "y": 1060, "w": 1228, "h": 1160, "is_interactive": true },
+    { "file": "Gate.dc.html", "x": 2656, "y": 1060, "w": 1228, "h": 940, "is_interactive": true },
+    { "file": "Runs.dc.html", "x": 0, "y": 2660, "w": 1228, "h": 1140, "is_interactive": true },
+    { "file": "Flaky.dc.html", "x": 1328, "y": 2660, "w": 1228, "h": 880, "is_interactive": true },
+    { "file": "Cases.dc.html", "x": 2656, "y": 2660, "w": 1228, "h": 1220, "is_interactive": true },
+    { "file": "Sync.dc.html", "x": 3984, "y": 2660, "w": 1228, "h": 920, "is_interactive": true },
+    { "file": "System.dc.html", "title": "Design system", "x": 0, "y": 4000, "w": 1228, "h": 1240 }
   ],
   "annotations": [
     { "id": "try-this", "x": 1540, "y": 0, "w": 360, "text": "Try the core loop\n\n1. Today → \"Triage 1 →\"\n2. Give \"Checker notification not received\" a category\n3. Release gate → the unclassified rule turns green and a waiver becomes possible\n\nClassify it as Product defect instead and the Jira rule fails, because that signature has no Jira link.\n\nKeys 1–7 switch views." },
-    { "id": "ux-changes", "x": 1540, "y": 330, "w": 360, "text": "What changed in the UX\n\n• Today leads with a verdict sentence and one next action, not six equal KPIs\n• Failure analysis → Triage: a split view where categorising is one click, feeding the gate live\n• Run comparison moved to Runs (tick two rows)\n• Colour is only a signal light; normal = dim, anomalies glow" }
+    { "id": "ux-changes", "x": 1540, "y": 330, "w": 360, "text": "What this pass changed\n\n• Type is IBM Plex Sans + Plex Mono on a seven-step ramp — no sizes in between\n• The muted ink was failing contrast at 4.1:1 and is now 6.8:1; anything dimmer is a stroke and may never carry text\n• Status split into a mark step (lamps, bars) and a text step, replacing four hardcoded one-off reds\n• Tables sit flush on the page; only panels get a plate, so the pages stopped reading as a stack of identical cards\n• Keyboard focus rings exist at all now" },
+    { "id": "system-sheet", "x": 1540, "y": 700, "w": 360, "text": "The Design system artboard, bottom left, is the implementation source of truth: tokens with their measured contrast, the type ramp, control anatomy and the spacing scale — what the React + Tailwind build reads from." }
   ],
   "launch": { "view": "focused", "file": "Main.dc.html" }
 }
